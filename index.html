@@ -81,21 +81,32 @@ body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
 .grp-t i{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .grp-t span{color:var(--muted);font-weight:400;font-size:12px}
 /* look board */
-.board{display:grid;grid-template-columns:1fr 1.9fr 1fr;gap:10px;align-items:center;background:linear-gradient(160deg,var(--soft1),var(--soft2) 60%,var(--soft3));border-radius:18px;padding:14px 10px}
-.board .side{display:flex;flex-direction:column;gap:10px;align-items:center}
-.board .mid{display:flex;flex-direction:column;gap:8px;align-items:center}
+.board{position:relative;display:grid;grid-template-columns:.78fr 2.5fr .78fr;gap:8px;align-items:center;background:linear-gradient(160deg,var(--soft1),var(--soft2) 60%,var(--soft3));border-radius:18px;padding:16px 8px}
+.board .side{display:flex;flex-direction:column;gap:9px;align-items:center}
+.board .mid{display:flex;flex-direction:column;gap:9px;align-items:center}
 .board .slot{width:100%;cursor:pointer;transition:transform .15s}
 .board .slot:active{transform:scale(.95)}
-.board .side .slot{max-width:76px}
+.board .side .slot{max-width:84px}
 .board .pair{display:flex;align-items:center;justify-content:center;width:100%}
-.board .pair .slot{max-width:124px}
-.board .pair .slot.full,.board .pair .slot.swim{max-width:140px}
-.board .pair .slot.outer,.board .pair .slot.cover{margin-left:-26px;transform:rotate(5deg);z-index:0;max-width:100px}
+.board .pair .slot{max-width:158px}
+.board .pair .slot.full,.board .pair .slot.swim{max-width:176px}
+.board .pair .slot.outer,.board .pair .slot.cover{margin-left:-30px;transform:rotate(5deg);z-index:0;max-width:118px}
 .board .pair .slot.top,.board .pair .slot.full,.board .pair .slot.swim{z-index:1}
-.board .mid .slot.bottom{max-width:118px}
-.board .mid .slot.shoes{max-width:92px}
-.board .mid .slot.head{max-width:62px}
-.board.mini{gap:4px;padding:8px 4px;border-radius:14px}
+.board .mid .slot.bottom{max-width:150px}
+.board .mid .slot.shoes{max-width:118px}
+.board .mid .slot.head{max-width:78px}
+.zoomb{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px auto 0;font-size:13px;font-weight:600;color:var(--pri);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:7px 14px}
+.board.xl{grid-template-columns:.8fr 2.6fr .8fr;padding:18px 8px;gap:10px}
+.board.xl .side{gap:12px}.board.xl .mid{gap:12px}
+.board.xl .side .slot{max-width:110px}
+.board.xl .pair .slot{max-width:210px}.board.xl .pair .slot.full,.board.xl .pair .slot.swim{max-width:230px}
+.board.xl .pair .slot.outer,.board.xl .pair .slot.cover{max-width:160px;margin-left:-40px}
+.board.xl .mid .slot.bottom{max-width:200px}.board.xl .mid .slot.shoes{max-width:150px}.board.xl .mid .slot.head{max-width:100px}
+.zlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+.zlist div{display:flex;gap:10px;align-items:center;background:#fff;border-radius:14px;padding:8px;font-size:13px;box-shadow:var(--shadow)}
+.zlist .vis{width:44px;flex:0 0 44px;border-radius:10px}
+.zlist small{color:var(--muted);display:block}
+.board.mini{grid-template-columns:1fr 1.9fr 1fr;gap:4px;padding:8px 4px;border-radius:14px}
 .board.mini .side{gap:4px}.board.mini .mid{gap:4px}
 .board.mini .side .slot{max-width:30px}.board.mini .vis{border-radius:8px}
 .board.mini .pair .slot{max-width:58px}.board.mini .pair .slot.full{max-width:62px}
@@ -553,7 +564,7 @@ async function setTheme(k) { S.settings.theme = k; await saveSettings(); applyTh
 /* ---------- estado ---------- */
 const S = {
   profile: null, settings: { stored: [], custom: [], dayLook: null, manual: null, theme: 'auto' }, items: [], looks: [],
-  tab: 'hoy', arm: { sec: 'ropa', season: null, q: '', fav: false, wash: false, search: false },
+  _zl: [], tab: 'hoy', arm: { sec: 'ropa', season: null, q: '', fav: false, wash: false, search: false },
   lk: { tab: 'fav', grp: 'all', month: today().slice(0, 7) }, fc: null, news: [], _u: null
 };
 const currentSeason = () => { const m = new Date().getMonth(); return m >= 2 && m <= 4 ? 'p' : m >= 5 && m <= 8 ? 'v' : 'o'; };
@@ -891,9 +902,21 @@ function board(look, mode = 'view', li = 0) {
   mid += t('shoes');
   const left = ['eyes','neck','waist','legs'].map(s => t(s)).join('');
   const right = ['ears','bag','wrist','hands'].map(s => t(s)).join('');
-  return `<div class="board ${mode === 'mini' ? 'mini' : ''}"><div class="side">${left}</div><div class="mid">${mid}</div><div class="side">${right}</div></div>`;
+  const grid = `<div class="board ${mode === 'mini' ? 'mini' : mode === 'xl' ? 'xl' : ''}"><div class="side">${left}</div><div class="mid">${mid}</div><div class="side">${right}</div></div>`;
+  if (mode === 'mini' || mode === 'xl' || mode === 'build') return grid;
+  S._zl.push(look); return grid + `<button class="zoomb" onclick="zoomLook(${S._zl.length - 1})">🔍 Ver en grande</button>`;
 }
 
+function zoomLook(k) {
+  S._z = S._zl[k]; if (!S._z) return;
+  openSheet('zoom', () => {
+    const l = S._z; const e = l.ev ? evById(l.ev) : null;
+    const order = ['head','top','full','swim','cover','outer','bottom','shoes','bag','eyes','neck','ears','wrist','waist','legs','hands'];
+    const items = order.map(s => l.slots[s] && itemById(l.slots[s])).filter(Boolean);
+    return `${sheetHdr(e ? `${e.emoji} ${esc(evName(e))}` : 'Tu look', 'zoom')}${board(l, 'xl')}
+      <div class="zlist">${items.map(i => `<div>${vis(i)}<span><b>${esc(itemName(i))}</b><small>${COL[i.color] ? COL[i.color].name : ''}</small></span></div>`).join('')}</div>`;
+  });
+}
 /* ---------- hojas (pantallas superpuestas) ---------- */
 const SH = [];
 function openSheet(id, fn, modal = false) {
@@ -1206,7 +1229,7 @@ function renderResult() {
   const head = `<div class="sh-hdr"><button class="icon-btn" onclick="S.cl.res=null;rs('create')">‹</button><h2 style="font-size:18px">${ev.emoji} ${esc(evName(ev))}</h2><button class="chip" onclick="weatherTap('${c.date}')">${ctxLabel(ctx)}</button></div>
     <p class="center small muted" style="margin:-4px 0 10px">${fmtDate(c.date)} · ${FR[c.fr][1]} ${FR[c.fr][0]}${ctx.rain ? ' · ☔ llévate algo para la lluvia' : ''}</p>`;
   if (!c.res.looks.length) return head + `<div class="card center"><div style="font-size:44px">🤷‍♀️</div><p>${esc(c.res.missing)}</p><button class="btn btn-pri" onclick="closeSheet('create',true);openAdd()">＋ Añadir prendas</button></div>`;
-  const slides = c.res.looks.map((l, k) => `<div class="slide"><div class="card" style="padding:12px">
+  const slides = c.res.looks.map((l, k) => `<div class="slide"><div class="card" style="padding:10px 8px">
       <div class="lookhead"><h3>Opción ${k + 1}</h3>${l.trendy ? '<span class="tag">✨ En tendencia</span>' : ''}</div>
       ${board(l, 'res', k)}<p class="center small muted" style="margin:8px 0 0">Toca una prenda para cambiarla</p>
       <div class="acts"><button class="btn btn-col" onclick="wearRes(${k})">👗 Me lo pongo</button><button class="btn" onclick="favRes(${k})">♡ Guardar</button><button class="btn icon" onclick="planRes(${k})" title="Al calendario">🗓️</button></div>
@@ -1273,7 +1296,7 @@ function renderSurprise() {
   return `${sheetHdr('🎲 Look sorpresa', 'surprise', `<button class="chip" onclick="weatherTap(today())">${ctxLabel(sp.ctx)}</button>`)}
     <p class="center small muted" style="margin:-4px 0 12px">Un conjunto al azar con tu ropa y el tiempo de hoy</p>
     <div class="chips" style="justify-content:center;margin-bottom:12px">${Object.entries(FR).map(([k, v]) => `<button class="chip ${sp.fr === k ? 'on' : ''}" onclick="S.sp.fr='${k}';rollSurprise()">${v[1]} ${v[0]}</button>`).join('')}</div>
-    ${sp.look ? `<div class="card" style="padding:12px"><div id="spboard">${board(sp.look)}</div>
+    ${sp.look ? `<div class="card" style="padding:10px 8px"><div id="spboard">${board(sp.look)}</div>
         ${sp.look.trendy ? '<div style="margin-top:10px"><span class="tag">✨ En tendencia</span></div>' : ''}</div>
       <button class="btn btn-col btn-big" onclick="rollSurprise()">🎲 Otro al azar</button>
       <div class="acts"><button class="btn ${sp.saved ? 'btn-pri' : ''}" onclick="saveSurprise()">${sp.saved ? '❤️ Guardado' : '♡ Me gusta, guardar'}</button><button class="btn" onclick="wearSurprise()">👗 Me lo pongo hoy</button></div>
