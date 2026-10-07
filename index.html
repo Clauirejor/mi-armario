@@ -69,6 +69,10 @@ body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
 .uwrow .e{font-size:22px;width:40px;height:40px;border-radius:12px;background:#E3F5F3;display:flex;align-items:center;justify-content:center;flex:0 0 40px}
 .uwrow b{font-size:14px;display:block}.uwrow small{font-size:11.5px;color:var(--muted)}.uwrow .lw{color:#C0392B;font-weight:700}
 .uwrow.low .e{background:#FDE3DF}
+.uwrow .e .sk{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:17px}
+.seg2{display:flex;background:#fff;border-radius:999px;padding:4px;margin:0 0 10px;box-shadow:var(--shadow)}
+.seg2 button{flex:1;padding:8px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg2 button.on{background:#2FA39A;color:#fff}
 .uwrow .cnt{width:34px;height:34px;border-radius:50%;background:#fff;border:1.5px solid var(--line);font-size:18px;font-weight:600;color:var(--pri)}
 .uwrow .num{min-width:34px;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center}
 .uwrow.low .num{color:#C0392B}
@@ -1128,7 +1132,13 @@ function renderArmGrid() {
 /* ---------- ROPA INTERIOR, CALCETINES Y LAVADORA ---------- */
 const uwOn = () => !!S.settings.interior;
 const uwAllowed = u => u.g === 'u' || gender() === 'x' || u.g === gender();
-const uwList = () => UW.filter(uwAllowed);
+const SOCK_USES = ['socks','ssocks','psocks'];
+const sockDet = () => S.settings.socksMode === 'det';
+const SK_LEN = { altos: ['Altos','Hasta media pierna'], cortos: ['Cortos','Por encima del tobillo'], tobilleros: ['Tobilleros','Justo en el tobillo'], pinkis: ['Pinkis','Invisibles, no se ven'] };
+const SK_COL = [['negro','negros'],['blanco','blancos'],['gris','grises'],['marino','azul marino'],['beige','beige'],['marron','marrones'],['burdeos','burdeos'],['rojo','rojos'],['rosa','rosas'],['oliva','verdes'],['celeste','celestes'],['multi','de colores']];
+const detSocks = () => (S.settings.socks || []).map(s => ({ id: s.id, name: `${SK_LEN[s.len][0]} ${(SK_COL.find(c => c[0] === s.color) || [0, s.color])[1]}`, emoji: '🧦', g: 'u', use: 'dsock', low: 1, len: s.len, color: s.color }));
+const sockBg = c => c === 'multi' ? 'linear-gradient(135deg,#F2735E,#E9B23F,#5FA36B,#5B8DEF)' : (COL[c] ? COL[c].hex : '#eee');
+const uwList = () => UW.filter(uwAllowed).filter(u => !(sockDet() && SOCK_USES.includes(u.use))).concat(sockDet() ? detSocks() : []);
 const st = id => { const s = S.settings.stock || (S.settings.stock = {}); return s[id] || (s[id] = { c: 0, d: 0 }); };
 const tracked = u => { const s = st(u.id); return s.c + s.d > 0; };
 const uwCleanTotal = () => uwList().reduce((a, u) => a + st(u.id).c, 0);
@@ -1137,13 +1147,19 @@ const washCount = () => (uwOn() ? uwList().reduce((a, u) => a + st(u.id).d, 0) :
 function renderInterior() {
   const list = uwList(); const any = list.some(tracked); const wc = washCount();
   const row = u => { const s = st(u.id); const low = tracked(u) && s.c <= u.low;
-    return `<div class="uwrow ${low ? 'low' : ''}"><span class="e">${u.emoji}</span><div class="grow"><b>${u.name}</b><small>${tracked(u) ? `${s.d ? `🧺 ${s.d} en la lavadora` : 'Nada en la lavadora'}${low ? ' · <span class="lw">¡Quedan pocas!</span>' : ''}` : 'Toca ＋ para añadir las que tienes'}</small></div>
+    const det = u.use === 'dsock';
+    return `<div class="uwrow ${low ? 'low' : ''}"><span class="e" ${det ? `style="background:${sockBg(u.color)};box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"` : ''}>${det ? `<span class="sk">${u.emoji}</span>` : u.emoji}</span><div class="grow" ${det ? `onclick="editSock('${u.id}')" style="cursor:pointer"` : ''}><b>${u.name}${det ? ' <span class="muted" style="font-size:11px">✏️</span>' : ''}</b><small>${tracked(u) ? `${s.d ? `🧺 ${s.d} en la lavadora` : 'Nada en la lavadora'}${low ? ' · <span class="lw">¡Quedan pocas!</span>' : ''}` : 'Toca ＋ para añadir las que tienes'}</small></div>
       <button class="cnt" onclick="uwUse('${u.id}')" title="Usada">−</button><button class="num" onclick="uwSet('${u.id}')">${s.c}</button><button class="cnt" onclick="uwAdd('${u.id}')" title="Añadir">＋</button></div>`; };
-  const groups = gender() === 'm' ? [['Ropa interior', ['bottom','none']], ['Calcetines', ['socks','ssocks','psocks']]]
-    : [['Ropa interior', ['bottom','period']], ['Sujetadores', ['bra','sbra']], ['Calcetines', ['socks','ssocks','psocks']], ...(gender() === 'x' ? [['Otros', ['none']]] : [])];
+  const groups = gender() === 'm' ? [['Ropa interior', ['bottom','none']], ['Calcetines', ['socks','ssocks','psocks','dsock']]]
+    : [['Ropa interior', ['bottom','period']], ['Sujetadores', ['bra','sbra']], ['Calcetines', ['socks','ssocks','psocks','dsock']], ...(gender() === 'x' ? [['Otros', ['none']]] : [])];
   return `${!any ? `<div class="note">👋 Pon cuántas tienes <b>limpias</b> de cada una. Cuando pulses <b>«Me lo pongo»</b> en un look, se restan solas y pasan a la lavadora.</div>` : ''}
     ${gender() !== 'm' ? `<button class="bigopt ${S.settings.period ? 'on' : ''}" style="--c:#E8729B;padding:12px 14px;font-size:15px" onclick="togPeriod()"><span class="e" style="width:42px;height:42px;font-size:22px">🩸</span><span class="grow">Estoy con la regla<div class="small muted" style="font-weight:400">${S.settings.period ? 'Usaré braguitas de regla' : 'Desactivado'}</div></span><span class="sw ${S.settings.period ? 'on' : ''}"><i></i></span></button>` : ''}
-    ${groups.map(([t, uses]) => { const us = list.filter(u => uses.includes(u.use)); return us.length ? `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div><div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : ''; }).join('')}
+    ${groups.map(([t, uses]) => { const us = list.filter(u => uses.includes(u.use));
+      if (t === 'Calcetines') return `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div>
+        <div class="seg2"><button class="${!sockDet() ? 'on' : ''}" onclick="setSockMode('gen')">Genérico</button><button class="${sockDet() ? 'on' : ''}" onclick="setSockMode('det')">Por tipo y color</button></div>
+        ${us.length ? `<div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : `<p class="small muted center" style="margin:4px 0 10px">Añade tus calcetines por largo y color: altos, cortos, tobilleros o pinkis.</p>`}
+        ${sockDet() ? `<button class="btn btn-sm" style="display:flex;margin:-4px auto 16px" onclick="openAddSock()">＋ Añadir calcetines</button>` : ''}`;
+      return us.length ? `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div><div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : ''; }).join('')}
     <p class="small muted center" style="margin:-4px 0 12px">Número = limpias · <b>−</b> la he usado (va a la lavadora) · <b>＋</b> tengo una más · toca el número para cambiarlo</p>
     <button class="btn btn-pri btn-big" onclick="openWash()">🧺 Lavadora ${wc ? `· ${wc}` : ''}</button>
     <button class="btn btn-sm" style="display:flex;margin:14px auto 0" onclick="togInterior()">🙈 Ocultar este apartado</button>
@@ -1158,6 +1174,31 @@ async function togInterior() {
   else { if (S.arm.sec === 'interior') S.arm.sec = 'ropa'; toast('Apartado oculto 🙈'); }
   render();
 }
+async function setSockMode(m) { S.settings.socksMode = m; await saveSettings(); render(); }
+function openAddSock() {
+  S._sk = { len: 'cortos', color: 'negro', n: 3 };
+  openSheet('sock', () => { const k = S._sk; return `<h2 class="serif" style="margin-bottom:12px">Añadir calcetines</h2>
+    <div class="field"><label>Largo</label><div class="grid2">${Object.entries(SK_LEN).map(([id, v]) => `<button class="tchip ${k.len === id ? 'on' : ''}" style="padding:10px" onclick="S._sk.len='${id}';rs('sock')"><b style="font-size:14px">🧦 ${v[0]}</b><span class="muted">${v[1]}</span></button>`).join('')}</div></div>
+    <div class="field"><label>Color</label><div class="ccgrid">${SK_COL.map(c => `<button class="cc ${k.color === c[0] ? 'on' : ''}" onclick="S._sk.color='${c[0]}';rs('sock')"><i style="background:${sockBg(c[0])}"></i>${c[1]}</button>`).join('')}</div></div>
+    <div class="field"><label>¿Cuántos pares limpios?</label><div class="row" style="justify-content:center;gap:18px"><button class="icon-btn" onclick="S._sk.n=Math.max(1,S._sk.n-1);rs('sock')">−</button><b class="serif" style="font-size:30px;min-width:40px;text-align:center">${k.n}</b><button class="icon-btn" onclick="S._sk.n++;rs('sock')">＋</button></div></div>
+    <button class="btn btn-pri btn-big" onclick="saveSock()">Añadir ${k.n} par${k.n > 1 ? 'es' : ''} · ${SK_LEN[k.len][0].toLowerCase()} ${(SK_COL.find(c => c[0] === k.color) || [])[1]}</button>`; }, true);
+}
+async function saveSock() {
+  const k = S._sk; S.settings.socks = S.settings.socks || [];
+  let s = S.settings.socks.find(x => x.len === k.len && x.color === k.color);
+  if (!s) { s = { id: 'sk_' + uid(), len: k.len, color: k.color }; S.settings.socks.push(s); }
+  st(s.id).c += k.n; await saveSettings(); closeSheet('sock', true); toast('Calcetines añadidos 🧦'); render();
+}
+function editSock(id) {
+  S._ske = id;
+  openSheet('esock', () => { const u = detSocks().find(x => x.id === S._ske); if (!u) return ''; const s = st(u.id);
+    return `<h2 class="serif" style="margin-bottom:4px">🧦 ${u.name}</h2><p class="muted small" style="margin-bottom:16px">${SK_LEN[u.len][1]}</p>
+      <div class="field"><label>Pares limpios</label><div class="row" style="justify-content:center;gap:18px"><button class="icon-btn" onclick="sockAdj(-1)">−</button><b class="serif" style="font-size:30px;min-width:40px;text-align:center">${s.c}</b><button class="icon-btn" onclick="sockAdj(1)">＋</button></div></div>
+      <p class="center small muted">🧺 ${s.d} en la lavadora</p>
+      <button class="btn btn-big btn-danger" style="margin-top:14px" onclick="delSock()">Eliminar este tipo</button>`; }, true);
+}
+async function sockAdj(n) { const s = st(S._ske); s.c = Math.max(0, s.c + n); await saveSettings(); rs('esock'); render(); }
+async function delSock() { if (!confirm('¿Eliminar estos calcetines del inventario?')) return; S.settings.socks = (S.settings.socks || []).filter(x => x.id !== S._ske); delete S.settings.stock[S._ske]; await saveSettings(); closeSheet('esock', true); render(); }
 async function togPeriod() { S.settings.period = !S.settings.period; await saveSettings(); render(); }
 
 // al ponerse un look: resta ropa interior y calcetines
@@ -1183,7 +1224,28 @@ function consumeUW(look) {
   }
   const open = shoes && (ty(shoes).fl.includes('open') || ['alpargatas'].includes(shoes.type));
   const noSocks = water || fl.includes('noshoes') || open || !shoes;
-  if (!noSocks) {
+  const dsocks = detSocks().filter(tracked);
+  if (!noSocks && sockDet() && dsocks.length) {
+    const t = shoes.type, fam = ty(shoes).fam;
+    const lens = sport ? ['tobilleros','cortos','pinkis'] : ['salones','slingback','bailarinas','lona'].includes(t) ? ['pinkis','tobilleros']
+      : ['mocasines','nauticos'].includes(t) ? ['pinkis','cortos','altos'] : ['zapatillas_blancas','deportivas'].includes(t) ? ['tobilleros','pinkis','cortos']
+      : (fam === 'Botas' || ['cordones','zapato_vestir'].includes(t)) ? ['altos','cortos','tobilleros'] : ['cortos','tobilleros','altos','pinkis'];
+    const ref = itemById(look.slots.bottom) || itemById(look.slots.full) || shoes;
+    const darkC = ['negro','marino','gris','marron','botella','berenjena','burdeos','denim'];
+    let cols = sport ? ['blanco','gris','negro'] : (shoes.color === 'blanco' && fam === 'Zapatillas') ? ['blanco','gris','beige']
+      : lens[0] === 'pinkis' ? (isLight(COL[shoes.color] && COL[shoes.color].hex) ? ['beige','blanco','gris','negro'] : ['negro','marino','gris','beige'])
+      : darkC.includes(ref.color) ? ['negro','marino','gris','marron'] : ['blanco','beige','gris','negro'];
+    if (ev.fmax <= 2) cols = cols.concat(['multi']);
+    const most = arr => arr.filter(s => st(s.id).c > 0).sort((a, b) => st(b.id).c - st(a.id).c)[0];
+    let pick = null;
+    for (const L of lens) {
+      for (const C of cols) { pick = dsocks.find(s => s.len === L && s.color === C && st(s.id).c > 0); if (pick) break; }
+      if (!pick) pick = most(dsocks.filter(s => s.len === L));
+      if (pick) break;
+    }
+    if (!pick) pick = most(dsocks);
+    if (!pick) used.push({ u: { ...dsocks[0], name: 'Calcetines' }, none: true }); else { const s = st(pick.id); s.c--; s.d++; used.push({ u: pick }); }
+  } else if (!noSocks && !sockDet()) {
     if (sport) take(['calcetines_dep','calcetines'], true);
     else if (['lona','bailarinas','mocasines','nauticos','salones','slingback','zapatillas_blancas'].includes(shoes.type)) take(['pinkies','calcetines'], true);
     else if (!['botas_altas','mosqueteras'].includes(shoes.type) || ev.fmax <= 3) take(['calcetines','pinkies'], true);
@@ -1196,7 +1258,7 @@ async function afterWear(look, base) {
   const ok = used.filter(x => !x.none);
   if (ok.length) msg += '\n🧺 A la lavadora: ' + ok.map(x => x.u.emoji + ' ' + x.u.name.toLowerCase()).join(', ');
   const none = used.filter(x => x.none);
-  if (none.length) msg += '\n⚠️ ¡No te quedan ' + none.map(x => x.u.name.toLowerCase()).join(' ni ') + ' limpias!';
+  if (none.length) msg += '\n⚠️ ¡Se te han acabado: ' + none.map(x => x.u.name.toLowerCase()).join(', ') + '!';
   const low = ok.filter(x => st(x.u.id).c <= x.u.low);
   if (low.length) msg += '\n⚠️ Quedan pocas: ' + low.map(x => `${x.u.name.toLowerCase()} (${st(x.u.id).c})`).join(', ') + '. ¡Pon una lavadora!';
   toast(msg, used.length ? 4200 : 2300);
