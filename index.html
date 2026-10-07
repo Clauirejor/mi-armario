@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#7A1F2B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -19,6 +19,8 @@
   --shadow:0 6px 20px rgba(80,40,20,.08);--r:20px;
 }
 *{box-sizing:border-box}
+html,body,button,a,input,select,label,.slot,.itile{touch-action:manipulation}
+input,select,textarea{font-size:16px !important}
 html,body{margin:0}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;padding:0}
@@ -1847,6 +1849,11 @@ function setupPWA() {
   const a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = icon; document.head.appendChild(a);
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
 }
+
+/* ---------- sin zoom por doble toque ---------- */
+(() => {
+  ['gesturestart','gesturechange','gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+})();
 
 /* ---------- arranque ---------- */
 async function init() {
