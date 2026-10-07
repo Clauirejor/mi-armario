@@ -78,6 +78,7 @@ body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
 .wsteps{display:flex;justify-content:center;gap:8px;margin:-4px 0 16px}.wsteps i{width:30px;height:5px;border-radius:3px;background:#EADFD3}.wsteps i.on{background:#B3261E}
 .holdbtn{position:relative;overflow:hidden;background:#B3261E;color:#fff;border:none;user-select:none;-webkit-user-select:none}.holdbtn .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#6E0F0A}.holdbtn.holding .fill{width:100%;transition:width 2s linear}.holdbtn .lb{position:relative}
 .btn:disabled{opacity:.4}
+.reccode{font-family:ui-monospace,Menlo,monospace;font-size:30px;font-weight:700;letter-spacing:.12em;background:#fff;border:2px dashed var(--pri);border-radius:16px;padding:16px;margin:16px 0 10px;color:var(--pri)}
 .seg2{display:flex;background:#fff;border-radius:999px;padding:4px;margin:0 0 10px;box-shadow:var(--shadow)}
 .seg2 button{flex:1;padding:8px 4px;border-radius:999px;font-size:12.5px;line-height:1.15;font-weight:600;color:var(--muted)}
 .seg2 button.on{background:#2FA39A;color:#fff}
@@ -1220,24 +1221,74 @@ async function pinKey(k) {
     else { p.v = ''; p.err = 'Código incorrecto'; rs('pin'); if (navigator.vibrate) navigator.vibrate(120); }
   } else if (p.mode === 'new') { p.first = p.v; p.v = ''; p.mode = 'confirm'; rs('pin'); }
   else if (p.mode === 'confirm') {
-    if (p.v === p.first) { S.settings.pin = hashPin(p.v); S.uwUnlocked = true; await saveSettings(); closeSheet('pin', true); toast('Código guardado 🔒'); p.cb && p.cb(); }
+    if (p.v === p.first) { S.settings.pin = hashPin(p.v); S.uwUnlocked = true; await saveSettings(); closeSheet('pin', true); if (!S.settings.recA) openPlanB(p.cb, true); else { toast('Código guardado 🔒'); p.cb && p.cb(); } }
     else { p.v = ''; p.first = ''; p.mode = 'new'; p.err = 'No coinciden. Vuelve a empezar'; rs('pin'); }
   }
 }
-function forgotPin() {
-  closeSheet('pin', true);
-  openSheet('forgot', () => `<div class="center"><div style="font-size:40px">🤔</div><h2 class="serif" style="margin:6px 0">¿Olvidaste el código?</h2>
-    <p class="muted small" style="margin-bottom:16px">Por privacidad no se puede recuperar. Puedes quitar el código, pero <b>se borrará el inventario de ropa interior y calcetines</b> (tus prendas y looks no se tocan).</p>
-    <button class="btn btn-big btn-danger" onclick="resetPin()">Quitar código y borrar Interior</button>
-    <button class="btn btn-big" style="margin-top:10px" onclick="closeSheet('forgot',true)">Cancelar</button></div>`, true);
+/* plan B: pregunta de seguridad + código de recuperación */
+const REC_Q = ['¿Cómo se llamaba tu primera mascota?','¿En qué ciudad naciste?','¿Cómo se llamaba tu colegio?','¿Cuál es tu comida favorita?','¿Cómo se llama tu mejor amiga de la infancia?','¿Cuál fue tu primer coche?'];
+const normAns = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9ñ ]/g, '').replace(/\s+/g, ' ').trim();
+const newRecCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c = ''; for (let i = 0; i < 8; i++) c += A[Math.floor(Math.random() * A.length)]; return c.slice(0, 4) + '-' + c.slice(4); };
+function openPlanB(cb, first) {
+  S._pb = { q: REC_Q[0], custom: '', a: '', cb, first, code: null };
+  openSheet('planb', renderPlanB);
 }
+function renderPlanB() {
+  const b = S._pb;
+  if (b.code) return `<div class="center"><div style="font-size:44px">🔑</div><h2 class="serif" style="margin:6px 0">Tu código de recuperación</h2>
+      <p class="muted small">Apúntalo o haz una captura de pantalla y guárdalo en un sitio seguro. Solo se muestra ahora.</p>
+      <div class="reccode">${b.code}</div>
+      <button class="btn" onclick="copyRec()">📋 Copiar</button></div>
+      <div class="note" style="margin-top:16px">Si olvidas el código de 4 números podrás entrar con <b>tu pregunta de seguridad</b> o con <b>este código</b>, sin perder nada.</div>
+      <button class="btn btn-pri btn-big" onclick="finishPlanB()">Ya lo he guardado</button>`;
+  return `${sheetHdr('🛟 Plan B', 'planb')}
+    <p class="muted" style="margin-bottom:6px">Por si algún día olvidas el código. Así podrás crear uno nuevo <b>sin perder nada</b>.</p>
+    <div class="field"><label>Pregunta de seguridad</label><select class="inp" onchange="S._pb.q=this.value;rs('planb')">${REC_Q.map(q => `<option ${b.q === q ? 'selected' : ''}>${q}</option>`).join('')}<option value="__own" ${b.q === '__own' ? 'selected' : ''}>✏️ Escribir mi propia pregunta</option></select>
+      ${b.q === '__own' ? `<input class="inp" style="margin-top:8px" placeholder="Tu pregunta" value="${esc(b.custom)}" oninput="S._pb.custom=this.value">` : ''}</div>
+    <div class="field"><label>Respuesta</label><input class="inp" placeholder="Tu respuesta" value="${esc(b.a)}" oninput="S._pb.a=this.value" autocomplete="off"><p class="small muted" style="margin-top:6px">Da igual mayúsculas o tildes al responder.</p></div>
+    <button class="btn btn-pri btn-big" onclick="savePlanB()">Guardar plan B</button>`;
+}
+async function savePlanB() {
+  const b = S._pb; const q = b.q === '__own' ? b.custom.trim() : b.q;
+  if (!q) return toast('Escribe tu pregunta'); if (normAns(b.a).length < 2) return toast('Escribe una respuesta');
+  b.code = newRecCode();
+  S.settings.recQ = q; S.settings.recA = hashPin('a:' + normAns(b.a)); S.settings.recC = hashPin('c:' + b.code.replace('-', ''));
+  await saveSettings(); rs('planb');
+}
+function copyRec() { const c = S._pb.code; (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast('Copiado 📋'), () => toast(c)); }
+function finishPlanB() { const b = S._pb; closeSheet('planb', true); toast(b.first ? 'Código y plan B guardados 🔒' : 'Plan B actualizado 🛟'); rs('config'); b.cb && b.cb(); }
+function forgotPin() {
+  closeSheet('pin', true); S._fg = { step: 'menu', v: '', err: '' };
+  openSheet('forgot', () => {
+    const f = S._fg; const s = S.settings;
+    if (f.step === 'q') return `<h2 class="serif" style="margin-bottom:6px">❓ Pregunta de seguridad</h2><p style="margin-bottom:10px"><b>${esc(s.recQ)}</b></p>
+      <input class="inp" id="fgv" placeholder="Tu respuesta" autocomplete="off" oninput="S._fg.v=this.value"><p class="small" style="color:#C0392B;min-height:18px">${esc(f.err)}</p>
+      <button class="btn btn-pri btn-big" onclick="checkForgot('q')">Comprobar</button><button class="btn btn-big" style="margin-top:8px" onclick="S._fg.step='menu';rs('forgot')">Atrás</button>`;
+    if (f.step === 'c') return `<h2 class="serif" style="margin-bottom:6px">🔑 Código de recuperación</h2><p class="muted small" style="margin-bottom:10px">El que apuntaste al crear el código (por ejemplo ABCD-1234).</p>
+      <input class="inp" id="fgv" style="text-transform:uppercase;letter-spacing:.15em;text-align:center" placeholder="XXXX-XXXX" autocomplete="off" oninput="S._fg.v=this.value"><p class="small" style="color:#C0392B;min-height:18px">${esc(f.err)}</p>
+      <button class="btn btn-pri btn-big" onclick="checkForgot('c')">Comprobar</button><button class="btn btn-big" style="margin-top:8px" onclick="S._fg.step='menu';rs('forgot')">Atrás</button>`;
+    return `<div class="center"><div style="font-size:40px">🛟</div><h2 class="serif" style="margin:6px 0">¿Olvidaste el código?</h2><p class="muted small" style="margin-bottom:14px">Elige cómo quieres recuperarlo.</p></div>
+      ${s.recA ? `<button class="bigopt" style="--c:#5B8DEF" onclick="S._fg={step:'q',v:'',err:''};rs('forgot')"><span class="e">❓</span><span class="grow">Responder mi pregunta<div class="small muted" style="font-weight:400">No se pierde nada</div></span></button>` : ''}
+      ${s.recC ? `<button class="bigopt" style="--c:#5FA36B" onclick="S._fg={step:'c',v:'',err:''};rs('forgot')"><span class="e">🔑</span><span class="grow">Usar el código de recuperación<div class="small muted" style="font-weight:400">No se pierde nada</div></span></button>` : ''}
+      <button class="bigopt" style="--c:#B3261E" onclick="lastResort()"><span class="e">🗑️</span><span class="grow">Último recurso<div class="small muted" style="font-weight:400">Quita el código y borra solo el inventario de Interior</div></span></button>
+      <button class="btn btn-big" style="margin-top:6px" onclick="closeSheet('forgot',true)">Cancelar</button>`;
+  }, true);
+}
+function checkForgot(kind) {
+  const f = S._fg; const s = S.settings;
+  const ok = kind === 'q' ? hashPin('a:' + normAns(f.v)) === s.recA : hashPin('c:' + String(f.v).toUpperCase().replace(/[^A-Z0-9]/g, '')) === s.recC;
+  if (!ok) { f.err = kind === 'q' ? 'Respuesta incorrecta' : 'Código incorrecto'; rs('forgot'); const i = $('#fgv'); if (i) { i.value = f.v; i.focus(); } return; }
+  closeSheet('forgot', true); S.uwUnlocked = true;
+  askPin('Crea tu nuevo código', () => { toast('Nuevo código guardado 🔒'); render(); }, 'new');
+}
+function lastResort() { resetPin(); }
 async function resetPin() {
-  if (!confirm('¿Seguro? Se borrarán las cantidades de ropa interior y calcetines.')) return;
-  S.settings.pin = null; S.settings.stock = {}; S.settings.socks = []; S.uwUnlocked = false; await saveSettings();
+  if (!confirm('¿Seguro? Se quitará el código y se borrarán las cantidades de ropa interior y calcetines. Tus prendas y looks no se tocan.')) return;
+  S.settings.pin = null; S.settings.recA = null; S.settings.recC = null; S.settings.recQ = null; S.settings.stock = {}; S.settings.socks = []; S.uwUnlocked = false; await saveSettings();
   closeSheet('forgot', true); rs('config'); toast('Código quitado'); render();
 }
 function setPinFlow() { withPin('Cambiar código', () => askPin('Nuevo código', () => rs('config'), 'new')); }
-function removePin() { askPin('Quitar código', async () => { S.settings.pin = null; await saveSettings(); toast('Código quitado'); rs('config'); render(); }); }
+function removePin() { askPin('Quitar código', async () => { S.settings.pin = null; S.settings.recA = S.settings.recC = S.settings.recQ = null; await saveSettings(); toast('Código quitado'); rs('config'); render(); }); }
 function lockNow() { S.uwUnlocked = false; if (S.arm.sec === 'interior') S.arm.sec = 'ropa'; render(); }
 
 async function togInterior() {
@@ -1762,6 +1813,7 @@ function renderConfig() {
     <div class="card" style="padding:4px 16px">
       ${row('#E8729B', '🩲', 'Ropa interior y calcetines', uwOn() ? 'Activado · se resta al ponerte un look' : 'Desactivado · es opcional', 'togInterior()', sw(uwOn()))}
       ${hasPin() ? row('#7A1F2B', '🔒', 'Cambiar código de Interior', 'Se pide al entrar en Interior', 'setPinFlow()')
+        + row('#5B8DEF', '🛟', 'Plan B por si olvidas el código', S.settings.recA ? 'Configurado ✓ · toca para cambiarlo' : '⚠️ Sin configurar · recomendado', "withPin('Plan B',()=>openPlanB())")
         + row('#8B7666', '🔓', 'Quitar código', 'Interior quedará sin protección', 'removePin()')
         + (S.uwUnlocked ? row('#2FA39A', '🙈', 'Bloquear ahora', 'También se bloquea solo al salir de la app', 'lockNow()') : '')
         : row('#7A1F2B', '🔒', 'Poner código a Interior', 'Un código de 4 números para entrar', "askPin('Nuevo código',()=>rs('config'),'new')")}
