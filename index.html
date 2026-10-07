@@ -220,6 +220,8 @@ input[type=range]{width:100%;accent-color:var(--pri)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 .forgot{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,var(--soft2),var(--soft3));border-radius:18px;padding:12px;margin-top:16px}
 .forgot .vis{width:64px;flex:0 0 64px}
+.dice{flex:0 0 92px;flex-direction:column;gap:0;padding:8px 6px;line-height:1.1}.dice .d{font-size:26px;display:inline-block;transition:transform .5s}.dice:hover .d,.dice:active .d{transform:rotate(200deg)}.dice small{font-size:11.5px}
+#spboard.roll{animation:roll .45s ease}@keyframes roll{0%{transform:scale(.92) rotate(-2deg);opacity:.3}60%{transform:scale(1.02) rotate(1deg);opacity:1}100%{transform:none}}
 .forgot p{margin:0;font-size:13.5px}
 .upc{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:10px;box-shadow:var(--shadow);margin-bottom:8px;width:100%;text-align:left}
 .upc .d{width:46px;text-align:center;border-radius:12px;padding:6px 0;background:color-mix(in srgb,var(--c) 18%,white);font-weight:700;font-size:18px;line-height:1}
@@ -571,8 +573,9 @@ const colorName = c => COL[c] ? COL[c].name.toLowerCase() : '';
 const gender = () => (S.profile && S.profile.gender) || 'f';
 const typeAllowed = t => t.g === 'u' || gender() === 'x' || t.g === gender();
 const evName = e => (e.id === 'amigas' && gender() === 'm') ? 'Comida con amigos' : e.name;
+const SURPRISE = { id: 'sorpresa', name: 'Look sorpresa', emoji: '🎲', grp: 'ocio', fmin: 2, fmax: 4, out: 2, fl: [] };
 const allEvents = () => EVENTS.concat(S.settings.custom || []);
-const evById = id => allEvents().find(e => e.id === id) || EVENTS.find(e => e.id === 'casual');
+const evById = id => allEvents().find(e => e.id === id) || (id === 'sorpresa' ? SURPRISE : null) || EVENTS.find(e => e.id === 'casual');
 const isStored = i => { const st = S.settings.stored || []; return st.length && [...i.seasons].every(s => st.includes(s)); };
 const excluded = i => (S.profile.excl || []).some(x => { const d = EXCL.find(e => e.id === x); return d && ((d.f && d.f(ty(i))) || (d.fi && d.fi(i))); });
 const avail = () => S.items.filter(i => (i.state || 'ok') === 'ok' && !isStored(i) && !excluded(i) && !(S.profile.hate || []).includes(i.color));
@@ -768,8 +771,9 @@ function generate(ev, ctx, n = 3, rng = Math.random) {
   };
 
   const scored = bases.map(b => {
-    const sh = shoes.length ? bestOf(shoes, s => scoreShoe(s, b) + rng() * 0.5) : null;
-    return { b, shoe: sh ? sh.item : null, s: scoreMain(b) + (sh ? sh.s : -0.5) + rng() * 1.3 };
+    const J = ctx.opts.random ? 5 : 1.3;
+    const sh = shoes.length ? bestOf(shoes, s => scoreShoe(s, b) + rng() * (ctx.opts.random ? 2.5 : 0.5)) : null;
+    return { b, shoe: sh ? sh.item : null, s: scoreMain(b) + (sh ? sh.s : -0.5) + rng() * J };
   }).sort((a, b) => b.s - a.s);
 
   // elegir variedad
@@ -955,7 +959,7 @@ function renderHoy() {
     } else html += `<p class="muted">${esc(dl.missing || 'Añade más prendas para generar looks.')}</p><button class="btn btn-sm" onclick="openAdd()">＋ Añadir prenda</button>`;
     html += `</div>`;
   }
-  html += `<button class="btn btn-pri btn-big" onclick="openCreate()">¿A dónde vas? <span style="margin-left:auto">›</span></button>`;
+  html += `<div class="row"><button class="btn btn-pri btn-big grow" onclick="openCreate()">¿A dónde vas? <span style="margin-left:auto">›</span></button><button class="btn btn-col btn-big dice" onclick="openSurprise()" title="Look al azar"><span class="d">🎲</span><small>Al azar</small></button></div>`;
   // próximos
   const up = S.looks.filter(l => l.planned && l.date >= today()).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
   if (up.length) {
@@ -1251,6 +1255,33 @@ async function saveCustomEv() {
   S.settings.custom = (S.settings.custom || []).concat(ev); await saveSettings(); S.cl.ev = ev.id; closeSheet('cev', true); rs('create');
 }
 
+/* ---------- LOOK AL AZAR ---------- */
+function nowFr() { const h = new Date().getHours(); return h < 13 ? 'manana' : h < 19 ? 'tarde' : 'noche'; }
+function openSurprise() {
+  if (!S.items.length) return toast('Añade prendas a tu armario primero');
+  S.sp = { fr: nowFr(), look: null, missing: '', ctx: null, n: 0, saved: false };
+  rollSurprise(true); openSheet('surprise', renderSurprise);
+}
+function rollSurprise(silent) {
+  const sp = S.sp; const ctx = buildCtx(today(), sp.fr, { random: true });
+  const r = generate(SURPRISE, ctx, 1); sp.ctx = ctx; sp.look = r.looks[0] || null; sp.missing = r.missing; sp.n++; sp.saved = false;
+  if (!silent) { rs('surprise'); const b = document.querySelector('#spboard'); if (b) { b.classList.remove('roll'); void b.offsetWidth; b.classList.add('roll'); } }
+}
+function renderSurprise() {
+  const sp = S.sp;
+  return `${sheetHdr('🎲 Look sorpresa', 'surprise', `<button class="chip" onclick="weatherTap(today())">${ctxLabel(sp.ctx)}</button>`)}
+    <p class="center small muted" style="margin:-4px 0 12px">Un conjunto al azar con tu ropa y el tiempo de hoy</p>
+    <div class="chips" style="justify-content:center;margin-bottom:12px">${Object.entries(FR).map(([k, v]) => `<button class="chip ${sp.fr === k ? 'on' : ''}" onclick="S.sp.fr='${k}';rollSurprise()">${v[1]} ${v[0]}</button>`).join('')}</div>
+    ${sp.look ? `<div class="card" style="padding:12px"><div id="spboard">${board(sp.look)}</div>
+        ${sp.look.trendy ? '<div style="margin-top:10px"><span class="tag">✨ En tendencia</span></div>' : ''}</div>
+      <button class="btn btn-col btn-big" onclick="rollSurprise()">🎲 Otro al azar</button>
+      <div class="acts"><button class="btn ${sp.saved ? 'btn-pri' : ''}" onclick="saveSurprise()">${sp.saved ? '❤️ Guardado' : '♡ Me gusta, guardar'}</button><button class="btn" onclick="wearSurprise()">👗 Me lo pongo hoy</button></div>
+      <p class="center small muted" style="margin-top:12px">Los looks guardados están en <b>Looks → Favoritos</b></p>`
+    : `<div class="card center"><div style="font-size:44px">🤷‍♀️</div><p>${esc(sp.missing || 'No he podido montar un look.')}</p><button class="btn btn-pri" onclick="closeSheet('surprise',true);openAdd()">＋ Añadir prendas</button></div>`}`;
+}
+async function saveSurprise() { const sp = S.sp; if (!sp.look || sp.saved) return; await persistLook({ ...sp.look, ev: 'sorpresa' }, { fav: true, date: today() }); sp.saved = true; rs('surprise'); toast('Guardado para más adelante ❤️'); }
+async function wearSurprise() { const sp = S.sp; if (!sp.look) return; await persistLook({ ...sp.look, ev: 'sorpresa' }, { worn: true, fav: sp.saved, date: today() }); toast('¡Apuntado! A disfrutar ✨'); closeSheet('surprise'); }
+
 /* ---------- LOOKS ---------- */
 function lookCard(l) {
   const e = evById(l.ev);
@@ -1259,7 +1290,7 @@ function lookCard(l) {
 }
 function renderLooks() {
   const k = S.lk;
-  let html = `<div class="hdr"><div><h1 style="font-size:32px">Mis looks</h1><div class="muted">${S.looks.length} guardados</div></div><button class="btn btn-col btn-sm" onclick="openPhotoLook()">📸 Foto de mi look</button></div>
+  let html = `<div class="hdr"><div><h1 style="font-size:32px">Mis looks</h1><div class="muted">${S.looks.length} guardados</div></div><div class="row"><button class="btn btn-sm" onclick="openSurprise()">🎲 Al azar</button><button class="btn btn-col btn-sm" onclick="openPhotoLook()">📸 Foto</button></div></div>
     <div class="tabs">${[['fav','❤️ Favoritos'],['cal','🗓️ Calendario'],['all','📚 Todos'],['build','🧩 Montar a mano']].map(t => `<button class="${k.tab === t[0] ? 'on' : ''}" onclick="S.lk.tab='${t[0]}';render()">${t[1]}</button>`).join('')}</div>`;
   if (k.tab === 'fav' || k.tab === 'all') {
     let list = S.looks.slice().sort((a, b) => b.created - a.created); if (k.tab === 'fav') list = list.filter(l => l.fav);
