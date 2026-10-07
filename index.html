@@ -61,6 +61,17 @@ body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
 .thopt.on{border-color:var(--ink)}
 .thopt .sw{display:flex}.thopt .sw i{width:26px;height:26px;border-radius:50%;border:2px solid #fff;margin-left:-8px;display:block}.thopt .sw i:first-child{margin-left:0}
 .thopt b{display:block;font-size:16px}.thopt small{font-size:12px;opacity:.75}
+.secgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.secgrid button{background:#fff;border-radius:14px;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;box-shadow:0 2px 8px rgba(80,40,20,.06);border:2px solid transparent}
+.secgrid .e{font-size:22px;line-height:1.1}.secgrid b{font-size:11px;font-weight:600;white-space:nowrap}.secgrid small{font-size:10.5px;color:var(--muted)}
+.secgrid button.on{background:var(--c);color:#fff}.secgrid button.on small{color:rgba(255,255,255,.85)}
+.fch{gap:6px}.fch .chip{padding:6px 11px;font-size:12.5px}
+.famgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.famgrid button{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:7px 10px;text-align:left;border:2px solid transparent;box-shadow:0 2px 8px rgba(80,40,20,.05)}
+.famgrid .e{font-size:18px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 18%,white);flex:0 0 30px}
+.famgrid .t{flex:1;font-size:12.5px;font-weight:600;line-height:1.15}.famgrid .n{font-size:12px;color:var(--muted);font-weight:600}
+.famgrid button.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,white)}
+.famgrid button.zero{opacity:.55}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -564,7 +575,7 @@ async function setTheme(k) { S.settings.theme = k; await saveSettings(); applyTh
 /* ---------- estado ---------- */
 const S = {
   profile: null, settings: { stored: [], custom: [], dayLook: null, manual: null, theme: 'auto' }, items: [], looks: [],
-  _zl: [], tab: 'hoy', arm: { sec: 'ropa', season: null, q: '', fav: false, wash: false, search: false },
+  _zl: [], tab: 'hoy', arm: { fam: null, type: null, sec: 'ropa', season: null, q: '', fav: false, wash: false, search: false },
   lk: { tab: 'fav', grp: 'all', month: today().slice(0, 7) }, fc: null, news: [], _u: null
 };
 const currentSeason = () => { const m = new Date().getMonth(); return m >= 2 && m <= 4 ? 'p' : m >= 5 && m <= 8 ? 'v' : 'o'; };
@@ -1037,36 +1048,61 @@ async function setManual(tc) { S.settings.manual = tc ? { date: S._wd, tc } : nu
 async function setCity() { const v = $('#wxcity').value.trim(); if (!v) return; S.profile.city = v; S.profile.lat = null; S.profile.cityName = null; await saveProfile(); S.fc = null; await refreshWeather(true); S.settings.dayLook = null; closeSheet('wx'); toast(S.profile.lat ? '📍 ' + (S.profile.cityName || v) : 'No encuentro esa ciudad'); }
 
 /* ---------- ARMARIO ---------- */
+const FAM_EMOJI = { 'Camisetas y tops':'👕','Camisas y blusas':'👚','Jerséis y punto':'🧶','Pantalones':'👖','Faldas':'💃','Vestidos y monos':'👗','Trajes':'🤵','Baño':'👙',
+  'Verano':'☀️','Entretiempo':'🍃','Invierno':'❄️','Lluvia':'☔','Sandalias':'🩴','Zapatillas':'👟','Zapatos':'👠','Botas':'👢',
+  'Bolsos':'👜','Cabeza':'🕶️','Cuello':'🧣','Joyas y reloj':'💎','Otros':'✨','Arriba':'🎽','Abajo':'🩳','Capas':'🧥','Calzado':'👟' };
+const secTypes = sec => T.filter(t => t[4] === sec).map(t => TYPES[t[0]]).filter(typeAllowed);
+const secFams = sec => [...new Set(secTypes(sec).map(t => t.fam))];
+function armBase() {
+  const a = S.arm; const q = a.q.trim().toLowerCase();
+  let list = S.items.filter(i => ty(i).sec === a.sec);
+  if (a.season === 'all') list = list.filter(i => i.seasons.length === 3); else if (a.season) list = list.filter(i => i.seasons.includes(a.season));
+  if (a.fav) list = list.filter(i => i.fav); if (a.wash) list = list.filter(i => i.state === 'lavar');
+  if (q) list = list.filter(i => (itemName(i) + ' ' + colorName(i.color) + ' ' + (i.brand || '') + ' ' + ty(i).fam).toLowerCase().includes(q));
+  return list;
+}
+function armSec(s) { S.arm.sec = s; S.arm.fam = null; S.arm.type = null; render(); }
+function armFam(f) { S.arm.fam = S.arm.fam === f ? null : f; S.arm.type = null; render(); }
+function armType(t) { S.arm.type = S.arm.type === t ? null : t; render(); }
 function renderArmario() {
   const a = S.arm; const secCol = (SECS.find(s => s[0] === a.sec) || [])[3];
-  return `<div class="hdr"><div><h1 style="font-size:32px">Mi armario</h1><div class="muted">${S.items.length} prendas</div></div>
-    <div class="row"><button class="icon-btn" onclick="S.arm.search=!S.arm.search;render();setTimeout(()=>{const q=$('#armq');q&&q.focus()},50)">🔍</button><button class="icon-btn" onclick="openAdd()">＋</button></div></div>
-    ${a.search ? `<input class="inp" id="armq" placeholder="Buscar prendas, colores…" value="${esc(a.q)}" oninput="S.arm.q=this.value;renderArmGrid()" style="margin-bottom:6px">` : ''}
-    <div class="tabs">${SECS.map(s => `<button class="${a.sec === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.arm.sec='${s[0]}';render()">${s[2]} ${s[1]} <span class="small">${S.items.filter(i => ty(i).sec === s[0]).length}</span></button>`).join('')}</div>
-    <div class="chips">
+  const base = armBase(); const cnt = f => base.filter(f).length;
+  const fams = secFams(a.sec);
+  const types = a.fam ? secTypes(a.sec).filter(t => t.fam === a.fam) : [];
+  return `<div class="hdr" style="margin-bottom:10px"><div><h1 style="font-size:32px">Mi armario</h1><div class="muted">${S.items.length} prendas</div></div>
+    <div class="row"><button class="icon-btn" onclick="S.arm.search=!S.arm.search;render();setTimeout(()=>{const q=$('#armq');q&&q.focus()},50)">🔍</button><button class="icon-btn" onclick="openAdd(S.arm.sec,null,S.arm.type)">＋</button></div></div>
+    ${a.search ? `<input class="inp" id="armq" placeholder="Buscar prendas, colores…" value="${esc(a.q)}" oninput="S.arm.q=this.value;render();const q=$('#armq');q.focus();q.setSelectionRange(q.value.length,q.value.length)" style="margin-bottom:10px">` : ''}
+    <div class="secgrid">${SECS.map(s => `<button class="${a.sec === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="armSec('${s[0]}')"><span class="e">${s[2]}</span><b>${s[0] === 'compl' ? 'Complem.' : s[1]}</b><small>${S.items.filter(i => ty(i).sec === s[0]).length}</small></button>`).join('')}</div>
+    <div class="chips wrap fch">
       <button class="chip ${!a.season ? 'on' : ''}" style="--c:${secCol}" onclick="S.arm.season=null;render()">Todas</button>
       ${SEASONS.map(s => `<button class="chip ${a.season === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.arm.season='${s[0]}';render()">${s[2]} ${s[1]}</button>`).join('')}
       <button class="chip ${a.season === 'all' ? 'on' : ''}" style="--c:#9C7BD6" onclick="S.arm.season='all';render()">🔁 Todo el año</button>
       <button class="chip ${a.fav ? 'on' : ''}" style="--c:#E8729B" onclick="S.arm.fav=!S.arm.fav;render()">❤️ Favoritas</button>
       <button class="chip ${a.wash ? 'on' : ''}" style="--c:#2FA39A" onclick="S.arm.wash=!S.arm.wash;render()">🧺 Para lavar</button>
-    </div><div id="armgrid"></div>`;
+    </div>
+    <div class="famgrid">${fams.map((f, k) => { const n = cnt(i => ty(i).fam === f); return `<button class="${a.fam === f ? 'on' : ''} ${n || a.fam === f ? '' : 'zero'}" style="--c:${FAM_COLORS[k % FAM_COLORS.length]}" onclick="armFam('${f}')"><span class="e">${FAM_EMOJI[f] || '✨'}</span><span class="t">${f}</span><span class="n">${n}</span></button>`; }).join('')}</div>
+    ${types.length ? `<div class="chips wrap fch" style="margin-top:10px">${types.map(t => { const n = cnt(i => i.type === t.id); return `<button class="chip ${a.type === t.id ? 'on' : ''}" style="--c:${secCol};${n || a.type === t.id ? '' : 'opacity:.55'}" onclick="armType('${t.id}')">${t.emoji} ${t.name} ${n ? `· ${n}` : ''}</button>`; }).join('')}</div>` : ''}
+    <div id="armgrid"></div>`;
 }
 function renderArmGrid() {
-  const a = S.arm; const q = a.q.trim().toLowerCase(); const el = $('#armgrid'); if (!el) return;
-  let list = S.items.filter(i => ty(i).sec === a.sec);
-  if (a.season === 'all') list = list.filter(i => i.seasons.length === 3); else if (a.season) list = list.filter(i => i.seasons.includes(a.season));
-  if (a.fav) list = list.filter(i => i.fav); if (a.wash) list = list.filter(i => i.state === 'lavar');
-  if (q) list = list.filter(i => (itemName(i) + ' ' + colorName(i.color) + ' ' + (i.brand || '') + ' ' + ty(i).fam).toLowerCase().includes(q));
-  if (!list.length) { el.innerHTML = `<div class="card center" style="margin-top:14px"><div style="font-size:40px">🪄</div><p class="muted">No hay prendas aquí todavía.</p><button class="btn btn-pri btn-sm" onclick="openAdd('${a.sec}')">＋ Añadir</button></div>`; return; }
+  const a = S.arm; const el = $('#armgrid'); if (!el) return;
+  let list = armBase();
+  if (a.fam) list = list.filter(i => ty(i).fam === a.fam);
+  if (a.type) list = list.filter(i => i.type === a.type);
+  if (!list.length) {
+    const t = a.type ? TYPES[a.type] : null;
+    el.innerHTML = `<div class="card center" style="margin-top:14px"><div style="font-size:40px">${t ? t.emoji : '🪄'}</div><p class="muted">${t ? `Aún no tienes ${esc(t.name.toLowerCase())}${a.season || a.fav || a.wash ? ' con estos filtros' : ''}.` : 'No hay prendas aquí todavía.'}</p><button class="btn btn-pri btn-sm" onclick="openAdd('${a.sec}',null,${t ? `'${t.id}'` : 'null'})">＋ Añadir${t ? ' ' + esc(t.name.toLowerCase()) : ''}</button></div>`; return;
+  }
   const fams = {}; list.forEach(i => (fams[ty(i).fam] = fams[ty(i).fam] || []).push(i));
-  const order = [...new Set(T.filter(t => t[4] === a.sec).map(t => t[9]))];
-  el.innerHTML = order.filter(f => fams[f]).map((f, k) => `<div class="grp-t" style="--c:${FAM_COLORS[k % FAM_COLORS.length]}"><i></i>${f} <span>${fams[f].length}</span></div><div class="grid3">${fams[f].sort((x, y) => (y.fav ? 1 : 0) - (x.fav ? 1 : 0)).map(i => itile(i)).join('')}</div>`).join('');
+  const order = secFams(a.sec).concat(Object.keys(fams)).filter((f, k, arr) => arr.indexOf(f) === k);
+  el.innerHTML = order.filter(f => fams[f]).map((f, k) => `<div class="grp-t" style="--c:${FAM_COLORS[secFams(a.sec).indexOf(f) % FAM_COLORS.length]}"><i></i>${FAM_EMOJI[f] || ''} ${f} <span>${fams[f].length}</span></div><div class="grid3">${fams[f].sort((x, y) => (y.fav ? 1 : 0) - (x.fav ? 1 : 0)).map(i => itile(i)).join('')}</div>`).join('');
 }
 
 /* ---------- AÑADIR / EDITAR PRENDA ---------- */
-function openAdd(sec, editId) {
+function openAdd(sec, editId, typeId) {
   const it = editId ? itemById(editId) : null;
   S.ai = it ? { ...it, seasons: it.seasons, sec: ty(it).sec, edit: true } : { id: null, photo: null, sec: typeof sec === 'string' ? sec : (S.tab === 'armario' ? S.arm.sec : 'ropa'), type: null, color: null, color2: null, pattern: 'liso', fabric: '', seasons: '', f: null, occ: [], name: '', brand: '', fav: false, state: 'ok' };
+  if (!it && typeId && TYPES[typeId]) { S.ai.type = typeId; S.ai.sec = TYPES[typeId].sec; S.ai.seasons = TYPES[typeId].seasons; }
   openSheet('add', renderAdd);
 }
 function renderAdd() {
