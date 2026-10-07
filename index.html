@@ -71,7 +71,7 @@ body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
 .uwrow.low .e{background:#FDE3DF}
 .uwrow .e .sk{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:17px}
 .seg2{display:flex;background:#fff;border-radius:999px;padding:4px;margin:0 0 10px;box-shadow:var(--shadow)}
-.seg2 button{flex:1;padding:8px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg2 button{flex:1;padding:8px 4px;border-radius:999px;font-size:12.5px;line-height:1.15;font-weight:600;color:var(--muted)}
 .seg2 button.on{background:#2FA39A;color:#fff}
 .uwrow .cnt{width:34px;height:34px;border-radius:50%;background:#fff;border:1.5px solid var(--line);font-size:18px;font-weight:600;color:var(--pri)}
 .uwrow .num{min-width:34px;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center}
@@ -491,7 +491,8 @@ const SECS_ITEMS = [['ropa','Ropa','👚','#E8729B'],['abrigos','Abrigos','🧥'
 const SECS = SECS_ITEMS.concat([['interior','Interior','🧦','#2FA39A']]);
 // ropa interior y calcetines: [id, nombre, emoji, género, uso, avisar cuando queden ≤]
 const UW = [
-  ['braguita','Braguitas','🩲','f','bottom',3],['culotte_int','Culottes','🩲','f','bottom',2],['brasilena','Brasileñas','🩲','f','bottom',2],['tanga','Tangas','🩲','f','bottom',2],['braguita_regla','Braguitas de regla','🩸','f','period',2],
+  ['braguitas_gen','Braguitas','🩲','f','gbottom',4],['calzon_gen','Calzoncillos','🩲','m','gbottom',4],['sujetador_gen','Sujetadores','👙','f','gbra',1],
+  ['braguita','Braguitas clásicas','🩲','f','bottom',3],['culotte_int','Culottes','🩲','f','bottom',2],['brasilena','Brasileñas','🩲','f','bottom',2],['tanga','Tangas','🩲','f','bottom',2],['braguita_regla','Braguitas de regla','🩸','f','period',2],
   ['sujetador','Sujetadores','👙','f','bra',1],['sujetador_dep','Sujetadores deportivos','🎽','f','sbra',1],
   ['boxer','Bóxers','🩲','m','bottom',3],['slip','Slips','🩲','m','bottom',3],['camiseta_int','Camisetas interiores','👕','m','none',2],
   ['calcetines','Calcetines','🧦','u','socks',3],['calcetines_dep','Calcetines deportivos','🧦','u','ssocks',2],['pinkies','Calcetines invisibles','🧦','u','psocks',2]
@@ -1133,12 +1134,22 @@ function renderArmGrid() {
 const uwOn = () => !!S.settings.interior;
 const uwAllowed = u => u.g === 'u' || gender() === 'x' || u.g === gender();
 const SOCK_USES = ['socks','ssocks','psocks'];
-const sockDet = () => S.settings.socksMode === 'det';
+const uwMode = k => (k === 'socks' ? S.settings.socksMode : k === 'bra' ? S.settings.braMode : S.settings.bottomMode) || 'gen';
+const sockDet = () => uwMode('socks') === 'det';
+const modeHides = u => {
+  if (u.use === 'ssocks' || u.use === 'psocks') return true;
+  if (SOCK_USES.includes(u.use)) return sockDet();
+  if (u.use === 'gbottom') return uwMode('bottom') !== 'gen';
+  if (u.use === 'bottom') return uwMode('bottom') !== 'det';
+  if (u.use === 'gbra') return uwMode('bra') !== 'gen';
+  if (u.use === 'bra' || u.use === 'sbra') return uwMode('bra') !== 'det';
+  return false;
+};
 const SK_LEN = { altos: ['Altos','Hasta media pierna'], cortos: ['Cortos','Por encima del tobillo'], tobilleros: ['Tobilleros','Justo en el tobillo'], pinkis: ['Pinkis','Invisibles, no se ven'] };
 const SK_COL = [['negro','negros'],['blanco','blancos'],['gris','grises'],['marino','azul marino'],['beige','beige'],['marron','marrones'],['burdeos','burdeos'],['rojo','rojos'],['rosa','rosas'],['oliva','verdes'],['celeste','celestes'],['multi','de colores']];
 const detSocks = () => (S.settings.socks || []).map(s => ({ id: s.id, name: `${SK_LEN[s.len][0]} ${(SK_COL.find(c => c[0] === s.color) || [0, s.color])[1]}`, emoji: '🧦', g: 'u', use: 'dsock', low: 1, len: s.len, color: s.color }));
 const sockBg = c => c === 'multi' ? 'linear-gradient(135deg,#F2735E,#E9B23F,#5FA36B,#5B8DEF)' : (COL[c] ? COL[c].hex : '#eee');
-const uwList = () => UW.filter(uwAllowed).filter(u => !(sockDet() && SOCK_USES.includes(u.use))).concat(sockDet() ? detSocks() : []);
+const uwList = () => UW.filter(uwAllowed).filter(u => !modeHides(u)).concat(sockDet() ? detSocks() : []);
 const st = id => { const s = S.settings.stock || (S.settings.stock = {}); return s[id] || (s[id] = { c: 0, d: 0 }); };
 const tracked = u => { const s = st(u.id); return s.c + s.d > 0; };
 const uwCleanTotal = () => uwList().reduce((a, u) => a + st(u.id).c, 0);
@@ -1150,16 +1161,19 @@ function renderInterior() {
     const det = u.use === 'dsock';
     return `<div class="uwrow ${low ? 'low' : ''}"><span class="e" ${det ? `style="background:${sockBg(u.color)};box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"` : ''}>${det ? `<span class="sk">${u.emoji}</span>` : u.emoji}</span><div class="grow" ${det ? `onclick="editSock('${u.id}')" style="cursor:pointer"` : ''}><b>${u.name}${det ? ' <span class="muted" style="font-size:11px">✏️</span>' : ''}</b><small>${tracked(u) ? `${s.d ? `🧺 ${s.d} en la lavadora` : 'Nada en la lavadora'}${low ? ' · <span class="lw">¡Quedan pocas!</span>' : ''}` : 'Toca ＋ para añadir las que tienes'}</small></div>
       <button class="cnt" onclick="uwUse('${u.id}')" title="Usada">−</button><button class="num" onclick="uwSet('${u.id}')">${s.c}</button><button class="cnt" onclick="uwAdd('${u.id}')" title="Añadir">＋</button></div>`; };
-  const groups = gender() === 'm' ? [['Ropa interior', ['bottom','none']], ['Calcetines', ['socks','ssocks','psocks','dsock']]]
-    : [['Ropa interior', ['bottom','period']], ['Sujetadores', ['bra','sbra']], ['Calcetines', ['socks','ssocks','psocks','dsock']], ...(gender() === 'x' ? [['Otros', ['none']]] : [])];
+  const groups = [
+    ['Ropa interior', ['gbottom','bottom','period','none'], 'bottom', [['gen','Genérico'],['det', gender() === 'm' ? 'Bóxers y slips' : 'Por tipos']]],
+    ...(gender() !== 'm' ? [['Sujetadores', ['gbra','bra','sbra'], 'bra', [['gen','Genérico'],['det','Normal y deportivo'],['none','Sin sujetador']]]] : []),
+    ['Calcetines', ['socks','ssocks','psocks','dsock'], 'socks', [['gen','Genérico'],['det','Por tipo y color']]]
+  ];
   return `${!any ? `<div class="note">👋 Pon cuántas tienes <b>limpias</b> de cada una. Cuando pulses <b>«Me lo pongo»</b> en un look, se restan solas y pasan a la lavadora.</div>` : ''}
     ${gender() !== 'm' ? `<button class="bigopt ${S.settings.period ? 'on' : ''}" style="--c:#E8729B;padding:12px 14px;font-size:15px" onclick="togPeriod()"><span class="e" style="width:42px;height:42px;font-size:22px">🩸</span><span class="grow">Estoy con la regla<div class="small muted" style="font-weight:400">${S.settings.period ? 'Usaré braguitas de regla' : 'Desactivado'}</div></span><span class="sw ${S.settings.period ? 'on' : ''}"><i></i></span></button>` : ''}
-    ${groups.map(([t, uses]) => { const us = list.filter(u => uses.includes(u.use));
-      if (t === 'Calcetines') return `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div>
-        <div class="seg2"><button class="${!sockDet() ? 'on' : ''}" onclick="setSockMode('gen')">Genérico</button><button class="${sockDet() ? 'on' : ''}" onclick="setSockMode('det')">Por tipo y color</button></div>
-        ${us.length ? `<div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : `<p class="small muted center" style="margin:4px 0 10px">Añade tus calcetines por largo y color: altos, cortos, tobilleros o pinkis.</p>`}
-        ${sockDet() ? `<button class="btn btn-sm" style="display:flex;margin:-4px auto 16px" onclick="openAddSock()">＋ Añadir calcetines</button>` : ''}`;
-      return us.length ? `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div><div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : ''; }).join('')}
+    ${groups.map(([t, uses, key, opts]) => { const us = list.filter(u => uses.includes(u.use)); const m = uwMode(key);
+      const seg = `<div class="seg2">${opts.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" onclick="setUwMode('${key}','${v}')">${l}</button>`).join('')}</div>`;
+      let body = us.length ? `<div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : '';
+      if (key === 'bra' && m === 'none') body = `<p class="small muted center" style="margin:4px 0 14px">🚫 No se restará ningún sujetador al ponerte un look.</p>`;
+      if (key === 'socks' && m === 'det') body += `${us.length ? '' : `<p class="small muted center" style="margin:4px 0 10px">Añade tus calcetines por largo y color: altos, cortos, tobilleros o pinkis.</p>`}<button class="btn btn-sm" style="display:flex;margin:-4px auto 16px" onclick="openAddSock()">＋ Añadir calcetines</button>`;
+      return `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div>${seg}${body}`; }).join('')}
     <p class="small muted center" style="margin:-4px 0 12px">Número = limpias · <b>−</b> la he usado (va a la lavadora) · <b>＋</b> tengo una más · toca el número para cambiarlo</p>
     <button class="btn btn-pri btn-big" onclick="openWash()">🧺 Lavadora ${wc ? `· ${wc}` : ''}</button>
     <button class="btn btn-sm" style="display:flex;margin:14px auto 0" onclick="togInterior()">🙈 Ocultar este apartado</button>
@@ -1174,7 +1188,8 @@ async function togInterior() {
   else { if (S.arm.sec === 'interior') S.arm.sec = 'ropa'; toast('Apartado oculto 🙈'); }
   render();
 }
-async function setSockMode(m) { S.settings.socksMode = m; await saveSettings(); render(); }
+async function setUwMode(k, m) { S.settings[k === 'socks' ? 'socksMode' : k === 'bra' ? 'braMode' : 'bottomMode'] = m; await saveSettings(); render(); }
+async function setSockMode(m) { return setUwMode('socks', m); }
 function openAddSock() {
   S._sk = { len: 'cortos', color: 'negro', n: 3 };
   openSheet('sock', () => { const k = S._sk; return `<h2 class="serif" style="margin-bottom:12px">Añadir calcetines</h2>
@@ -1209,7 +1224,7 @@ function consumeUW(look) {
   const sport = fl.includes('sport'); const water = fl.includes('beach') || fl.includes('swim');
   const used = [];
   const take = (ids, preferFirst) => {
-    const us = ids.map(id => UW.find(u => u.id === id)).filter(u => u && uwAllowed(u) && tracked(u));
+    const us = ids.map(id => UW.find(u => u.id === id)).filter(u => u && uwAllowed(u) && !modeHides(u) && tracked(u));
     if (!us.length) return;
     let pick = preferFirst ? us.find(u => st(u.id).c > 0) : us.filter(u => st(u.id).c > 0).sort((a, b) => st(b.id).c - st(a.id).c)[0];
     if (!pick) { used.push({ u: us[0], none: true }); return; }
@@ -1217,10 +1232,12 @@ function consumeUW(look) {
   };
   if (!water) {
     if (g !== 'm' && S.settings.period) take(['braguita_regla'], true);
+    else if (uwMode('bottom') === 'gen') take(g === 'm' ? ['calzon_gen'] : g === 'f' ? ['braguitas_gen'] : ['braguitas_gen','calzon_gen'], true);
     else if (g === 'm') take(['boxer','slip']);
     else if (fl.includes('party') || fl.includes('date')) take(['tanga','brasilena','braguita','culotte_int'], true);
     else take(['braguita','culotte_int','brasilena','tanga']);
-    if (g !== 'm') take(sport ? ['sujetador_dep','sujetador'] : ['sujetador'], true);
+    if (g !== 'm' && uwMode('bra') === 'gen') take(['sujetador_gen'], true);
+    else if (g !== 'm' && uwMode('bra') === 'det') take(sport ? ['sujetador_dep','sujetador'] : ['sujetador'], true);
   }
   const open = shoes && (ty(shoes).fl.includes('open') || ['alpargatas'].includes(shoes.type));
   const noSocks = water || fl.includes('noshoes') || open || !shoes;
@@ -1246,9 +1263,7 @@ function consumeUW(look) {
     if (!pick) pick = most(dsocks);
     if (!pick) used.push({ u: { ...dsocks[0], name: 'Calcetines' }, none: true }); else { const s = st(pick.id); s.c--; s.d++; used.push({ u: pick }); }
   } else if (!noSocks && !sockDet()) {
-    if (sport) take(['calcetines_dep','calcetines'], true);
-    else if (['lona','bailarinas','mocasines','nauticos','salones','slingback','zapatillas_blancas'].includes(shoes.type)) take(['pinkies','calcetines'], true);
-    else if (!['botas_altas','mosqueteras'].includes(shoes.type) || ev.fmax <= 3) take(['calcetines','pinkies'], true);
+    take(['calcetines'], true);
   }
   return used;
 }
@@ -1761,7 +1776,7 @@ async function loadDemo() {
     const t = TYPES[type]; if (!t) continue;
     await saveItem({ id: uid(), type, name: '', color, color2: null, pattern: pattern || 'liso', fabric: fabric || '', seasons: t.seasons, f: t.f, occ: [], brand: '', fav: Math.random() < 0.12, state: 'ok', photo: null, added: new Date(now - (20 + Math.random() * 200) * 864e5).toISOString(), demo: true });
   }
-  const demoStock = gender() === 'm' ? { boxer: 7, slip: 3, camiseta_int: 3, calcetines: 8, calcetines_dep: 3 } : { braguita: 6, culotte_int: 3, brasilena: 3, tanga: 4, braguita_regla: 4, sujetador: 4, sujetador_dep: 2, calcetines: 6, calcetines_dep: 3, pinkies: 4 };
+  const demoStock = gender() === 'm' ? { calzon_gen: 10, boxer: 7, slip: 3, camiseta_int: 3, calcetines: 8, calcetines_dep: 3 } : { braguitas_gen: 12, sujetador_gen: 5, braguita: 6, culotte_int: 3, brasilena: 3, tanga: 4, braguita_regla: 4, sujetador: 4, sujetador_dep: 2, calcetines: 6, calcetines_dep: 3, pinkies: 4 };
   Object.entries(demoStock).forEach(([k, v]) => { const s = st(k); if (!s.c && !s.d) s.c = v; });
   S.settings.dayLook = null; await saveSettings(); toast(`Cargadas ${list.length} prendas de ejemplo 👗`); render();
 }
