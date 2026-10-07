@@ -487,7 +487,7 @@ const SECS_ITEMS = [['ropa','Ropa','👚','#E8729B'],['abrigos','Abrigos','🧥'
 const SECS = SECS_ITEMS.concat([['interior','Interior','🧦','#2FA39A']]);
 // ropa interior y calcetines: [id, nombre, emoji, género, uso, avisar cuando queden ≤]
 const UW = [
-  ['braguita','Braguitas','🩲','f','bottom',3],['tanga','Tangas','🩲','f','bottom',2],['braguita_regla','Braguitas de regla','🩸','f','period',2],
+  ['braguita','Braguitas','🩲','f','bottom',3],['culotte_int','Culottes','🩲','f','bottom',2],['brasilena','Brasileñas','🩲','f','bottom',2],['tanga','Tangas','🩲','f','bottom',2],['braguita_regla','Braguitas de regla','🩸','f','period',2],
   ['sujetador','Sujetadores','👙','f','bra',1],['sujetador_dep','Sujetadores deportivos','🎽','f','sbra',1],
   ['boxer','Bóxers','🩲','m','bottom',3],['slip','Slips','🩲','m','bottom',3],['camiseta_int','Camisetas interiores','👕','m','none',2],
   ['calcetines','Calcetines','🧦','u','socks',3],['calcetines_dep','Calcetines deportivos','🧦','u','ssocks',2],['pinkies','Calcetines invisibles','🧦','u','psocks',2]
@@ -1177,7 +1177,8 @@ function consumeUW(look) {
   if (!water) {
     if (g !== 'm' && S.settings.period) take(['braguita_regla'], true);
     else if (g === 'm') take(['boxer','slip']);
-    else take(fl.includes('party') || fl.includes('date') ? ['tanga','braguita'] : ['braguita','tanga'], fl.includes('party') || fl.includes('date'));
+    else if (fl.includes('party') || fl.includes('date')) take(['tanga','brasilena','braguita','culotte_int'], true);
+    else take(['braguita','culotte_int','brasilena','tanga']);
     if (g !== 'm') take(sport ? ['sujetador_dep','sujetador'] : ['sujetador'], true);
   }
   const open = shoes && (ty(shoes).fl.includes('open') || ['alpargatas'].includes(shoes.type));
@@ -1698,7 +1699,7 @@ async function loadDemo() {
     const t = TYPES[type]; if (!t) continue;
     await saveItem({ id: uid(), type, name: '', color, color2: null, pattern: pattern || 'liso', fabric: fabric || '', seasons: t.seasons, f: t.f, occ: [], brand: '', fav: Math.random() < 0.12, state: 'ok', photo: null, added: new Date(now - (20 + Math.random() * 200) * 864e5).toISOString(), demo: true });
   }
-  const demoStock = gender() === 'm' ? { boxer: 7, slip: 3, camiseta_int: 3, calcetines: 8, calcetines_dep: 3 } : { braguita: 8, tanga: 4, braguita_regla: 4, sujetador: 4, sujetador_dep: 2, calcetines: 6, calcetines_dep: 3, pinkies: 4 };
+  const demoStock = gender() === 'm' ? { boxer: 7, slip: 3, camiseta_int: 3, calcetines: 8, calcetines_dep: 3 } : { braguita: 6, culotte_int: 3, brasilena: 3, tanga: 4, braguita_regla: 4, sujetador: 4, sujetador_dep: 2, calcetines: 6, calcetines_dep: 3, pinkies: 4 };
   Object.entries(demoStock).forEach(([k, v]) => { const s = st(k); if (!s.c && !s.d) s.c = v; });
   S.settings.dayLook = null; await saveSettings(); toast(`Cargadas ${list.length} prendas de ejemplo 👗`); render();
 }
