@@ -483,7 +483,8 @@ const T = [
   ['cinturon','Cinturón','🪢','waist','compl','u','pvo',3,'','Otros'],
   ['medias','Medias','🧦','legs','compl','f','po',3,'','Otros'],
   ['guantes','Guantes','🧤','hands','compl','u','o',2,'cold','Otros'],
-  ['top_dep','Top deportivo','🎽','top','deporte','f','pvo',1,'sport','Arriba'],
+  ['top_dep','Top deportivo','🎽','top','deporte','f','pvo',1,'sport nobra','Arriba'],
+  ['mono_dep','Mono deportivo','🩱','full','deporte','f','pvo',1,'sport nobra','Arriba'],
   ['cam_tecnica','Camiseta técnica','🎽','top','deporte','u','pvo',1,'sport','Arriba'],
   ['mallas_largas','Mallas largas','👖','bottom','deporte','u','po',1,'sport','Abajo'],
   ['mallas_cortas','Mallas cortas / ciclistas','🩳','bottom','deporte','f','pv',1,'sport','Abajo'],
@@ -751,7 +752,7 @@ function generate(ev, ctx, n = 3, rng = Math.random) {
     covers = swim ? [] : pool.filter(i => slotOf(i) === 'cover');
   } else if (sport) {
     const sp = pool.filter(i => secOf(i) === 'deporte');
-    tops = sp.filter(i => slotOf(i) === 'top'); bottoms = sp.filter(i => slotOf(i) === 'bottom');
+    tops = sp.filter(i => slotOf(i) === 'top'); bottoms = sp.filter(i => slotOf(i) === 'bottom'); fulls = pref(sp.filter(i => slotOf(i) === 'full'), sOk);
     if (!tops.length) tops = pool.filter(i => ['cam_mc','cam_basica','cam_ml','sudadera','tirantes','sin_mangas'].includes(i.type));
     if (!bottoms.length) bottoms = pool.filter(i => ['leggings','shorts','bermudas'].includes(i.type));
     tops = pref(tops, sOk); bottoms = pref(bottoms, sOk);
@@ -1144,7 +1145,7 @@ function renderArmGrid() {
 const uwOn = () => !!S.settings.interior;
 const uwAllowed = u => u.g === 'u' || gender() === 'x' || u.g === gender();
 const SOCK_USES = ['socks','ssocks','psocks'];
-const uwMode = k => (k === 'socks' ? S.settings.socksMode : k === 'bra' ? S.settings.braMode : S.settings.bottomMode) || 'gen';
+const uwMode = k => { const v = (k === 'socks' ? S.settings.socksMode : k === 'bra' ? S.settings.braMode : S.settings.bottomMode) || 'gen'; return v === 'none' ? 'gen' : v; };
 const sockDet = () => uwMode('socks') === 'det';
 const modeHides = u => {
   if (u.use === 'ssocks' || u.use === 'psocks') return true;
@@ -1173,7 +1174,7 @@ function renderInterior() {
       <button class="cnt" onclick="uwUse('${u.id}')" title="Usada">−</button><button class="num" onclick="uwSet('${u.id}')">${s.c}</button><button class="cnt" onclick="uwAdd('${u.id}')" title="Añadir">＋</button></div>`; };
   const groups = [
     ['Ropa interior', ['gbottom','bottom','period','none'], 'bottom', [['gen','Genérico'],['det', gender() === 'm' ? 'Bóxers y slips' : 'Por tipos']]],
-    ...(gender() !== 'm' ? [['Sujetadores', ['gbra','bra','sbra'], 'bra', [['gen','Genérico'],['det','Normal y deportivo'],['none','Sin sujetador']]]] : []),
+    ...(gender() !== 'm' ? [['Sujetadores', ['gbra','bra','sbra'], 'bra', [['gen','Genérico'],['det','Normal y deportivo']]]] : []),
     ['Calcetines', ['socks','ssocks','psocks','dsock'], 'socks', [['gen','Genérico'],['det','Por tipo y color']]]
   ];
   return `${!any ? `<div class="note">👋 Pon cuántas tienes <b>limpias</b> de cada una. Cuando pulses <b>«Me lo pongo»</b> en un look, se restan solas y pasan a la lavadora.</div>` : ''}
@@ -1181,7 +1182,7 @@ function renderInterior() {
     ${groups.map(([t, uses, key, opts]) => { const us = list.filter(u => uses.includes(u.use)); const m = uwMode(key);
       const seg = `<div class="seg2">${opts.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" onclick="setUwMode('${key}','${v}')">${l}</button>`).join('')}</div>`;
       let body = us.length ? `<div class="card" style="padding:4px 12px">${us.map(row).join('')}</div>` : '';
-      if (key === 'bra' && m === 'none') body = `<p class="small muted center" style="margin:4px 0 14px">🚫 No se restará ningún sujetador al ponerte un look.</p>`;
+      if (key === 'bra') body += `<p class="small muted center" style="margin:-4px 0 14px">¿Un look sin sujetador? Márcalo al crear el look («🚫 Sin sujetador») o en la prenda («No necesita sujetador»).</p>`;
       if (key === 'socks' && m === 'det') body += `${us.length ? '' : `<p class="small muted center" style="margin:4px 0 10px">Añade tus calcetines por largo y color: altos, cortos, tobilleros o pinkis.</p>`}<button class="btn btn-sm" style="display:flex;margin:-4px auto 16px" onclick="openAddSock()">＋ Añadir calcetines</button>`;
       return `<div class="grp-t" style="--c:#2FA39A"><i></i>${t}</div>${seg}${body}`; }).join('')}
     <p class="small muted center" style="margin:-4px 0 12px">Número = limpias · <b>−</b> la he usado (va a la lavadora) · <b>＋</b> tengo una más · toca el número para cambiarlo</p>
@@ -1310,8 +1311,9 @@ function consumeUW(look) {
     else if (g === 'm') take(['boxer','slip']);
     else if (fl.includes('party') || fl.includes('date')) take(['tanga','brasilena','braguita','culotte_int'], true);
     else take(['braguita','culotte_int','brasilena','tanga']);
-    if (g !== 'm' && uwMode('bra') === 'gen') take(['sujetador_gen'], true);
-    else if (g !== 'm' && uwMode('bra') === 'det') take(sport ? ['sujetador_dep','sujetador'] : ['sujetador'], true);
+    const noBra = look.noBra || lookIds(look).some(id => { const it = itemById(id); return it && it.noBra; });
+    if (g !== 'm' && !noBra && uwMode('bra') === 'gen') take(['sujetador_gen'], true);
+    else if (g !== 'm' && !noBra && uwMode('bra') === 'det') take(sport ? ['sujetador_dep','sujetador'] : ['sujetador'], true);
   }
   const open = shoes && (ty(shoes).fl.includes('open') || ['alpargatas'].includes(shoes.type));
   const noSocks = water || fl.includes('noshoes') || open || !shoes;
@@ -1337,7 +1339,7 @@ function consumeUW(look) {
     if (!pick) pick = most(dsocks);
     if (!pick) used.push({ u: { ...dsocks[0], name: 'Calcetines' }, none: true }); else { const s = st(pick.id); s.c--; s.d++; used.push({ u: pick }); }
   } else if (!noSocks && !sockDet()) {
-    take(['calcetines'], true);
+    if (!ty(shoes).fl.includes('heel') && shoes.type !== 'bailarinas') take(['calcetines'], true);
   }
   return used;
 }
@@ -1404,6 +1406,7 @@ function renderAdd() {
       <div class="field"><label>Formalidad: ${a.f || (tt ? tt.f : 3)}</label><input type="range" min="1" max="5" value="${a.f || (tt ? tt.f : 3)}" oninput="S.ai.f=+this.value;this.previousElementSibling.textContent='Formalidad: '+this.value"><div class="seg"><span>Deporte</span><span>Casual</span><span>Arreglado</span><span>Elegante</span><span>Etiqueta</span></div></div>
       <div class="field"><label>Ocasiones</label><div class="chips wrap">${OCC.map(o => `<button class="chip ${a.occ.includes(o[0]) ? 'on' : ''}" style="--c:${GROUPS[o[0]][1]}" onclick="togOcc('${o[0]}')">${o[1]}</button>`).join('')}</div></div>
       <div class="field"><label>Marca</label><input class="inp" value="${esc(a.brand)}" oninput="S.ai.brand=this.value" placeholder="Ej: Mango"></div>
+      ${gender() !== 'm' && tt && ['top','full'].includes(tt.slot) ? `<div class="field"><button class="chip ${a.noBra ? 'on' : ''}" style="--c:#E8729B" onclick="S.ai.noBra=!S.ai.noBra;rs('add')">🚫 No necesita sujetador</button><p class="small muted" style="margin-top:6px">Por ejemplo un body, un vestido con copa o un mono deportivo. Al ponerte un look con esta prenda no se restará sujetador.</p></div>` : ''}
       ${a.edit ? `<div class="field"><label>Estado</label><div class="chips wrap">${[['ok','✅ Disponible'],['lavar','🧺 Para lavar'],['prestada','🤝 Prestada'],['arreglar','🪡 Para arreglar']].map(s => `<button class="chip ${(a.state || 'ok') === s[0] ? 'on' : ''}" onclick="S.ai.state='${s[0]}';rs('add')">${s[1]}</button>`).join('')}</div></div>` : ''}
     </details>
     <button class="btn btn-pri btn-big" onclick="saveAdd(false)">${a.edit ? 'Guardar cambios' : 'Guardar'}</button>
@@ -1412,7 +1415,7 @@ function renderAdd() {
 function colorGrid(sel, fn) {
   return `<div class="ccgrid">${COLORS.map(c => `<button class="cc ${sel === c[0] ? 'on' : ''}" onclick="${fn}('${c[0]}')"><i style="background:${c[2] === 'multi' ? 'conic-gradient(#F2735E,#E9B23F,#5FA36B,#5B8DEF,#9C7BD6,#F2735E)' : c[2]}"></i>${c[1]}</button>`).join('')}</div>`;
 }
-function pickType(id) { const t = TYPES[id]; S.ai.type = id; if (!S.ai.edit || !S.ai.seasons) S.ai.seasons = t.seasons; S.ai.f = null; rs('add'); }
+function pickType(id) { const t = TYPES[id]; S.ai.type = id; S.ai.noBra = t.fl.includes('nobra'); if (!S.ai.edit || !S.ai.seasons) S.ai.seasons = t.seasons; S.ai.f = null; rs('add'); }
 function pickColor(c) { S.ai.color = c; rs('add'); }
 function pickColor2(c) { S.ai.color2 = S.ai.color2 === c ? null : c; rs('add'); }
 function togSeason(s) { const a = S.ai; a.seasons = a.seasons.includes(s) ? a.seasons.replace(s, '') : 'pvo'.split('').filter(x => a.seasons.includes(x) || x === s).join(''); rs('add'); }
@@ -1423,7 +1426,7 @@ async function saveAdd(another) {
   if (!a.color) return toast('Elige un color 🎨');
   if (!a.seasons) return toast('Marca al menos una estación');
   const t = TYPES[a.type];
-  const item = { id: a.id || uid(), type: a.type, name: a.name.trim(), color: a.color, color2: a.color2, pattern: a.pattern, fabric: a.fabric, seasons: a.seasons, f: a.f || t.f, occ: a.occ, brand: a.brand.trim(), fav: a.fav, state: a.state || 'ok', photo: a.photo, added: a.added || new Date().toISOString() };
+  const item = { id: a.id || uid(), type: a.type, name: a.name.trim(), color: a.color, color2: a.color2, pattern: a.pattern, fabric: a.fabric, seasons: a.seasons, f: a.f || t.f, occ: a.occ, brand: a.brand.trim(), fav: a.fav, state: a.state || 'ok', photo: a.photo, noBra: !!a.noBra, added: a.added || new Date().toISOString() };
   await saveItem(item); S.settings.dayLook = null;
   if (another) { const sec = a.sec; toast('Guardada ✓ Siguiente'); S.ai = { id: null, photo: null, sec, type: null, color: null, color2: null, pattern: 'liso', fabric: '', seasons: '', f: null, occ: [], name: '', brand: '', fav: false, state: 'ok' }; rs('add'); window.scrollTo(0, 0); SH.find(s => s.id === 'add').el.scrollTop = 0; }
   else { closeSheet('add', true); if (SH.find(s => s.id === 'item')) rs('item'); toast(a.edit ? 'Cambios guardados' : 'Prenda guardada ✓'); render(); }
@@ -1517,6 +1520,7 @@ function renderCreate() {
         <button class="chip ${c.opts.comoda ? 'on' : ''}" style="--c:#5FA36B" onclick="togOpt('comoda')">🧸 Ir cómoda</button>
         <button class="chip ${c.opts.arreglada ? 'on' : ''}" style="--c:#E8729B" onclick="togOpt('arreglada')">💄 Muy arreglada</button>
         <button class="chip ${c.opts.sinTacones ? 'on' : ''}" style="--c:#F29A2E" onclick="togOpt('sinTacones')">🥿 Sin tacones</button>
+        ${uwOn() && gender() !== 'm' ? `<button class="chip ${c.opts.noBra ? 'on' : ''}" style="--c:#E8729B" onclick="togOpt('noBra')">🚫 Sin sujetador</button>` : ''}
         <button class="chip ${forced ? 'on' : ''}" style="--c:#9C7BD6" onclick="${forced ? "S.cl.opts.useItem=null;rs('create')" : 'pickForced()'}">${forced ? '✕ ' + esc(itemName(forced)) : '👚 Usar una prenda'}</button>
       </div></div>
     <button class="btn btn-pri btn-big" style="margin-top:8px" onclick="runCreate()">✨ Crear looks</button>`;
@@ -1570,11 +1574,12 @@ function swapSlot(li, slot) {
 function doSwap(id) { const { li, slot } = S._sw; const l = S.cl.res.looks[li]; if (id) l.slots[slot] = id; else delete l.slots[slot]; l.trendy = Object.values(l.slots).some(x => { const it = itemById(x); return it && isTrendy(it); }); S.cl.idx = li; closeSheet('swap', true); rs('create'); }
 async function wearRes(k) {
   const c = S.cl; const l = c.res.looks[k]; const future = c.date > today();
-  const nl = await persistLook(l, future ? { planned: true } : { worn: true, date: c.date });
+  const nb = c.opts.noBra ? { noBra: true } : {};
+  const nl = await persistLook(l, future ? { planned: true, ...nb } : { worn: true, date: c.date, ...nb });
   if (future) toast(`Apuntado para el ${fmtDate(c.date)} 🗓️`); else await afterWear(nl, '¡Apuntado! A disfrutar ✨'); closeSheet('create');
 }
-async function favRes(k) { await persistLook(S.cl.res.looks[k], { fav: true }); toast('Guardado en favoritos ❤️'); }
-async function planRes(k) { await persistLook(S.cl.res.looks[k], { planned: true }); toast(`En tu calendario · ${fmtDate(S.cl.date)} 🗓️`); }
+async function favRes(k) { await persistLook(S.cl.res.looks[k], { fav: true, ...(S.cl.opts.noBra ? { noBra: true } : {}) }); toast('Guardado en favoritos ❤️'); }
+async function planRes(k) { await persistLook(S.cl.res.looks[k], { planned: true, ...(S.cl.opts.noBra ? { noBra: true } : {}) }); toast(`En tu calendario · ${fmtDate(S.cl.date)} 🗓️`); }
 
 function openCustomEv() {
   S._ce = { name: '', emoji: '⭐', f: 3, out: 2 };
@@ -1674,7 +1679,7 @@ function openLook(id) {
   });
 }
 async function togLookFav(id) { const l = S.looks.find(x => x.id === id); l.fav = !l.fav; await saveLook(l); rs('look'); }
-async function wearAgain(id) { const l = S.looks.find(x => x.id === id); const nl = await persistLook(l, { worn: true, date: today(), photo: null, items: l.items }); await afterWear(nl, '¡Apuntado para hoy! ✨'); closeSheet('look'); }
+async function wearAgain(id) { const l = S.looks.find(x => x.id === id); const nl = await persistLook(l, { worn: true, date: today(), photo: null, items: l.items, ...(l.noBra ? { noBra: true } : {}) }); await afterWear(nl, '¡Apuntado para hoy! ✨'); closeSheet('look'); }
 async function markWorn(id) { const l = S.looks.find(x => x.id === id); l.worn = true; l.planned = false; await saveLook(l); if (l.date === today()) await afterWear(l, 'Marcado como puesto ✓'); else toast('Marcado como puesto ✓'); rs('look'); }
 async function removeLook(id) { if (!confirm('¿Eliminar este look?')) return; await delLook(id); closeSheet('look'); }
 
