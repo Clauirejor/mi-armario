@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7A1F2B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mi Armario">
+<title>Mi Armario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF4EC;--card:#fff;--ink:#3A2418;--muted:#8B7666;--line:#EADFD3;
+  --pri:#7A1F2B;--pri2:#B23A53;--coral:#F2735E;--mustard:#E9B23F;--sage:#5FA36B;
+  --sky:#5B8DEF;--lilac:#9C7BD6;--pink:#E8729B;--teal:#2FA39A;--orange:#F29A2E;
+  --shadow:0 6px 20px rgba(80,40,20,.08);--r:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;padding:0}
+input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif;font-weight:600;margin:0}
+#app{max-width:560px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px 120px}
+
+/* ===== temas de temporada ===== */
+:root,[data-theme="o"]{--bg:#FBF4EC;--ink:#3A2418;--muted:#8B7666;--line:#EADFD3;--pri:#7A1F2B;--pri2:#B23A53;--acc:#F2735E;--acc2:#E8729B;--soft1:#FFF9F3;--soft2:#FCEBE3;--soft3:#F7E9F6;--blob1:#F5A97F;--blob2:#C97B84;--blob3:#E9C46A}
+[data-theme="i"]{--bg:#F2F5FB;--ink:#1E2740;--muted:#6B7591;--line:#DCE3F0;--pri:#2B3A67;--pri2:#4A5FA8;--acc:#6C8EF5;--acc2:#A98BE8;--soft1:#F8FAFF;--soft2:#E7EEFC;--soft3:#EFE8FB;--blob1:#A9C2F7;--blob2:#D3C4F5;--blob3:#BFE3F0}
+[data-theme="p"]{--bg:#F5FAF2;--ink:#24361F;--muted:#6F7F68;--line:#DBE8D4;--pri:#3F8A55;--pri2:#6FB37A;--acc:#F28FB0;--acc2:#F2B83A;--soft1:#FBFFF8;--soft2:#E9F6E5;--soft3:#FDEEF4;--blob1:#BFE6C4;--blob2:#F7C1D6;--blob3:#FBE3A1}
+[data-theme="v"]{--bg:#FFF8EC;--ink:#2E2A24;--muted:#857A6A;--line:#F1E3CC;--pri:#E0603A;--pri2:#F29A2E;--acc:#16A6A0;--acc2:#2FC4D9;--soft1:#FFFCF5;--soft2:#FFEFD6;--soft3:#E2F7F5;--blob1:#FFD27F;--blob2:#8FE0DA;--blob3:#FFAD94}
+body,.sheet,.msheet .box,.sh-hdr{transition:background-color .4s}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.35;z-index:-1;pointer-events:none}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin:6px 0 16px;gap:10px}
+.hello small{display:block;font-family:'Playfair Display',serif;font-size:20px;color:var(--muted)}
+.hello h1{font-size:36px;line-height:1.05}
+.wpill{background:#fff;border-radius:16px;padding:8px 12px;box-shadow:var(--shadow);text-align:right;min-width:88px}
+.wpill .wt{font-size:20px;white-space:nowrap}.wpill .wt b{font-size:22px}
+.wpill div:last-child{font-size:11px;color:var(--muted)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+.sec-t{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}
+.sec-t h2{font-size:20px}.sec-t button{font-size:12px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:999px;font-weight:600;font-size:14px;background:#fff;border:1.5px solid var(--line)}
+.btn-pri{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;border:none;box-shadow:0 8px 20px color-mix(in srgb,var(--pri) 30%,transparent)}
+.btn-col{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:none;box-shadow:0 8px 20px color-mix(in srgb,var(--acc) 35%,transparent)}
+.btn-big{width:100%;padding:17px;font-size:16px;border-radius:18px}
+.btn-sm{padding:8px 13px;font-size:13px}
+.btn-danger{color:#B3261E;border-color:#F3C9C5}
+.row{display:flex;gap:8px;align-items:center}.row.wrap{flex-wrap:wrap}.row>.grow{flex:1}
+.chip{padding:8px 14px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-size:13px;font-weight:500;white-space:nowrap}
+.chip.on{background:var(--c,var(--pri));border-color:var(--c,var(--pri));color:#fff}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}.chips.wrap{flex-wrap:wrap;overflow:visible}
+.tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin:12px 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{padding:8px 0;font-weight:500;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-color:var(--c,var(--pri))}
+.thopt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border-radius:18px;padding:14px;margin-bottom:10px;border:2.5px solid transparent;box-shadow:var(--shadow)}
+.thopt.on{border-color:var(--ink)}
+.thopt .sw{display:flex}.thopt .sw i{width:26px;height:26px;border-radius:50%;border:2px solid #fff;margin-left:-8px;display:block}.thopt .sw i:first-child{margin-left:0}
+.thopt b{display:block;font-size:16px}.thopt small{font-size:12px;opacity:.75}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vis{position:relative;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;width:100%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);background:#fff;container-type:inline-size}
+.vis img{width:100%;height:100%;object-fit:cover;display:block}
+.vis .em{font-size:26px;font-size:28cqi;width:54%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.vis.tall{aspect-ratio:3/4}
+.vis.empty{background:repeating-linear-gradient(45deg,#fff,#fff 8px,#FBF1E8 8px,#FBF1E8 16px);box-shadow:inset 0 0 0 2px #EADFD3}
+.vis.empty .em{color:var(--muted)}
+.itile{position:relative;cursor:pointer;min-width:0}
+.itile .fav{position:absolute;top:6px;right:6px;font-size:13px}
+.itile .st{position:absolute;left:6px;top:6px;font-size:11px;background:#fff;border-radius:8px;padding:1px 5px}
+.itile.dim .vis{opacity:.45}
+.itile.sel .vis{outline:3px solid var(--pri);outline-offset:-3px}
+.itile .ck{position:absolute;right:6px;bottom:26px;width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center}
+.lbl{font-size:11.5px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grp-t{display:flex;align-items:center;gap:8px;font-weight:600;margin:18px 0 8px;font-size:15px}
+.grp-t i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.grp-t span{color:var(--muted);font-weight:400;font-size:12px}
+/* look board */
+.board{display:grid;grid-template-columns:1fr 1.9fr 1fr;gap:10px;align-items:center;background:linear-gradient(160deg,var(--soft1),var(--soft2) 60%,var(--soft3));border-radius:18px;padding:14px 10px}
+.board .side{display:flex;flex-direction:column;gap:10px;align-items:center}
+.board .mid{display:flex;flex-direction:column;gap:8px;align-items:center}
+.board .slot{width:100%;cursor:pointer;transition:transform .15s}
+.board .slot:active{transform:scale(.95)}
+.board .side .slot{max-width:76px}
+.board .pair{display:flex;align-items:center;justify-content:center;width:100%}
+.board .pair .slot{max-width:124px}
+.board .pair .slot.full,.board .pair .slot.swim{max-width:140px}
+.board .pair .slot.outer,.board .pair .slot.cover{margin-left:-26px;transform:rotate(5deg);z-index:0;max-width:100px}
+.board .pair .slot.top,.board .pair .slot.full,.board .pair .slot.swim{z-index:1}
+.board .mid .slot.bottom{max-width:118px}
+.board .mid .slot.shoes{max-width:92px}
+.board .mid .slot.head{max-width:62px}
+.board.mini{gap:4px;padding:8px 4px;border-radius:14px}
+.board.mini .side{gap:4px}.board.mini .mid{gap:4px}
+.board.mini .side .slot{max-width:30px}.board.mini .vis{border-radius:8px}
+.board.mini .pair .slot{max-width:58px}.board.mini .pair .slot.full{max-width:62px}
+.board.mini .pair .slot.outer,.board.mini .pair .slot.cover{max-width:44px;margin-left:-12px}
+.board.mini .mid .slot.bottom{max-width:52px}.board.mini .mid .slot.shoes{max-width:40px}.board.mini .mid .slot.head{max-width:28px}
+.tag{display:inline-flex;gap:4px;align-items:center;background:#FFF1CF;color:#8A5A00;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+.tag.sky{background:#E3ECFF;color:#2D55B5}.tag.pink{background:#FDE3EC;color:#A3325A}.tag.sage{background:#E2F2E5;color:#2F6E3B}
+.lookhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.lookhead h3{font-size:19px}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts .btn{flex:1}
+.acts .icon{flex:0 0 48px;padding:12px 0}
+/* nav */
+#nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:20}
+#nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);min-width:56px}
+#nav button .i{font-size:21px;filter:grayscale(1);opacity:.6;line-height:1}
+#nav button.on{color:var(--pri);font-weight:600}
+#nav button.on .i{filter:none;opacity:1}
+#nav .plus{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--pri));color:#fff;font-size:30px;margin-top:-28px;box-shadow:0 8px 20px color-mix(in srgb,var(--pri) 35%,transparent);display:flex;align-items:center;justify-content:center;min-width:0}
+/* sheets */
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:50;overflow-y:auto;animation:up .22s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.sheet .inner{max-width:560px;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) 16px 50px}
+.msheet{position:fixed;inset:0;background:rgba(40,20,10,.38);z-index:60;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.msheet .box{background:var(--bg);width:100%;max-width:560px;max-height:86vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom));animation:up .22s}
+.sh-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.sh-hdr h2{flex:1;text-align:center;font-size:20px}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 40px}
+.icon-btn.ghost{background:none;box-shadow:none}
+.field{margin:14px 0}
+.field>label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+.inp{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font-size:15px;outline:none}
+.inp:focus{border-color:var(--pri)}
+.h-title{font-size:30px;text-align:center;margin:8px 0 4px}
+.h-sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:16px}
+/* events */
+.evgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ev{background:#fff;border-radius:18px;padding:14px 6px 12px;text-align:center;border:2px solid transparent;box-shadow:var(--shadow);transition:.15s}
+.ev .e{font-size:28px;width:54px;height:54px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 20%,white)}
+.ev span{font-size:12.5px;font-weight:600;display:block;line-height:1.2}
+.ev.on{background:var(--c);color:#fff;transform:translateY(-2px)}
+.ev.on .e{background:rgba(255,255,255,.28)}
+.evgrp{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+/* trends */
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
+.hscroll::-webkit-scrollbar{display:none}
+.trend{flex:0 0 148px;height:188px;border-radius:18px;padding:12px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;background:linear-gradient(150deg,var(--a),var(--b));text-align:left;box-shadow:var(--shadow)}
+.trend .big{position:absolute;top:8px;right:8px;font-size:44px}
+.trend .ring{position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.12);top:-50px;left:-50px}
+.trend b{font-family:'Playfair Display',serif;font-size:17px;line-height:1.15}
+.trend small{font-size:11px;opacity:.9;margin-top:2px}
+.badge{display:inline-block;margin-top:8px;background:rgba(255,255,255,.95);color:var(--ink);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;align-self:flex-start}
+.news{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.news img,.news .ph{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:0 0 64px;background:linear-gradient(135deg,var(--pink),var(--lilac))}
+.news b{font-size:14px;display:block}.news small{color:var(--muted);font-size:12px}
+/* colors */
+.ccgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px 6px}
+.cc{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;color:var(--muted);text-align:center;line-height:1.1}
+.cc i{width:36px;height:36px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line);display:block}
+.cc.on i{box-shadow:0 0 0 3px var(--pri)}
+.cc.on{color:var(--ink);font-weight:600}
+.tgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tchip{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;background:#fff;border:2px solid transparent;font-size:11px;text-align:center;line-height:1.15;box-shadow:0 2px 8px rgba(80,40,20,.05)}
+.tchip .e{font-size:24px}
+.tchip.on{border-color:var(--pri);background:color-mix(in srgb,var(--pri) 9%,white)}
+.photo-box{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(160deg,var(--soft2),var(--soft3));aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.photo-box .frame{position:absolute;inset:14%;border:2.5px dashed rgba(255,255,255,.95);border-radius:18px;pointer-events:none}
+.photo-box img{width:100%;height:100%;object-fit:contain;background:#fff}
+.photo-box .pb{position:relative;z-index:2;display:flex;gap:10px}
+.photo-box .chg{position:absolute;bottom:10px;right:10px;z-index:2;display:flex;gap:6px}
+details.more{background:#fff;border-radius:16px;padding:4px 14px;margin:14px 0;box-shadow:var(--shadow)}
+details.more summary{padding:12px 0;font-weight:600;cursor:pointer;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+input[type=range]{width:100%;accent-color:var(--pri)}
+.seg{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{font-size:11px;text-align:center;color:var(--muted);font-weight:600;padding:4px 0}
+.cal .d{aspect-ratio:.78;background:#fff;border-radius:10px;font-size:11px;padding:3px 4px;position:relative;overflow:hidden;text-align:left}
+.cal .d.out{background:transparent}
+.cal .d.today{box-shadow:inset 0 0 0 2px var(--pri)}
+.cal .d .th{position:absolute;inset:17px 3px 3px;border-radius:7px;overflow:hidden}
+.cal .d .th .vis{height:100%;aspect-ratio:auto;border-radius:7px}
+.cal .d .dot{position:absolute;bottom:5px;left:50%;width:7px;height:7px;border-radius:50%;background:var(--coral);transform:translateX(-50%)}
+.lcard{background:#fff;border-radius:18px;padding:8px;box-shadow:var(--shadow);cursor:pointer}
+.lcard .ph{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;display:block}
+.lcard .lt{font-size:12.5px;font-weight:600;margin:6px 4px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcard .ld{font-size:11px;color:var(--muted);margin:0 4px 2px}
+/* carousel */
+.carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -16px;padding:4px 16px 8px;scrollbar-width:none}
+.carousel::-webkit-scrollbar{display:none}
+.carousel .slide{flex:0 0 calc(100% - 8px);scroll-snap-align:center}
+.dots{display:flex;justify-content:center;gap:6px;margin:6px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:#E3D3C4}.dots i.on{background:var(--pri);width:18px;border-radius:4px}
+/* profile */
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--pri));color:#fff;font-family:'Playfair Display',serif;font-size:32px;display:flex;align-items:center;justify-content:center}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.menu-item:last-child{border-bottom:none}
+.menu-item .mi{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;background:color-mix(in srgb,var(--c) 18%,white)}
+.menu-item b{display:block;font-size:14.5px}.menu-item small{color:var(--muted);font-size:12px}
+.menu-item .ar{margin-left:auto;color:var(--muted)}
+.bar{height:10px;border-radius:5px;background:#F1E6DB;overflow:hidden;flex:1}.bar i{display:block;height:100%;border-radius:5px}
+.stat{background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);text-align:center}
+.stat b{font-family:'Playfair Display',serif;font-size:26px;display:block;color:var(--c,var(--pri))}
+.stat small{font-size:12px;color:var(--muted)}
+/* onboarding */
+.ob{min-height:calc(100vh - 40px);display:flex;flex-direction:column}
+.prog{height:6px;background:#EEDFD2;border-radius:3px;overflow:hidden;margin:8px 0 22px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--pri),var(--acc2));border-radius:3px;transition:width .3s}
+.ob h1{font-size:30px;line-height:1.15;margin-bottom:8px}
+.ob .q{color:var(--muted);margin-bottom:22px}
+.ob .foot{margin-top:auto;padding-top:24px;display:flex;gap:10px}
+.bigopt{display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:16px;margin-bottom:10px;width:100%;text-align:left;border:2px solid transparent;box-shadow:var(--shadow);font-weight:600;font-size:16px}
+.bigopt .e{font-size:28px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 20%,white)}
+.bigopt.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,white)}
+.empty-card{text-align:center;padding:26px 18px;background:linear-gradient(150deg,var(--soft1),var(--soft2) 55%,var(--soft3))}
+.empty-card .e{font-size:48px}
+.muted{color:var(--muted)}.small{font-size:12.5px}.center{text-align:center}
+.note{background:#FFF6E2;border-radius:14px;padding:12px 14px;font-size:13px;color:#7A5300;margin:10px 0}
+#toast{position:fixed;bottom:104px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:99;font-size:14px;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.forgot{display:flex;gap:12px;align-items:center;background:linear-gradient(120deg,var(--soft2),var(--soft3));border-radius:18px;padding:12px;margin-top:16px}
+.forgot .vis{width:64px;flex:0 0 64px}
+.forgot p{margin:0;font-size:13.5px}
+.upc{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:10px;box-shadow:var(--shadow);margin-bottom:8px;width:100%;text-align:left}
+.upc .d{width:46px;text-align:center;border-radius:12px;padding:6px 0;background:color-mix(in srgb,var(--c) 18%,white);font-weight:700;font-size:18px;line-height:1}
+.upc .d small{display:block;font-size:10px;font-weight:600;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="blob" style="width:300px;height:300px;background:var(--blob1);top:-80px;right:-80px"></div>
+<div class="blob" style="width:260px;height:260px;background:var(--blob2);top:40%;left:-120px"></div>
+<div class="blob" style="width:240px;height:240px;background:var(--blob3);bottom:-60px;right:-60px"></div>
+<div id="app"></div>
+<nav id="nav">
+  <button data-t="hoy" onclick="go('hoy')"><span class="i">🏠</span>Inicio</button>
+  <button data-t="armario" onclick="go('armario')"><span class="i">👗</span>Armario</button>
+  <button class="plus" onclick="openAdd()" aria-label="Añadir prenda">＋</button>
+  <button data-t="looks" onclick="go('looks')"><span class="i">💫</span>Looks</button>
+  <button data-t="perfil" onclick="go('perfil')"><span class="i">👤</span>Perfil</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   MI ARMARIO · PWA de un solo archivo
+   Datos en IndexedDB (móvil). Tiempo: Open-Meteo (sin clave).
+   ========================================================= */
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const z2 = n => String(n).padStart(2, '0');
+const ds = d => d.getFullYear() + '-' + z2(d.getMonth() + 1) + '-' + z2(d.getDate());
+const today = () => ds(new Date());
+const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return ds(d); };
+const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
+const fmtDate = s => { const d = new Date(s + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()].slice(0, 3); };
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2300); }
+function mulberry(seedStr) { let a = 0; for (const c of String(seedStr)) a = (a * 31 + c.charCodeAt(0)) | 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffle(arr, rng = Math.random) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ---------- base de datos (IndexedDB) ---------- */
+const DB = {
+  db: null, mem: { kv: {}, items: {}, looks: {} },
+  open() {
+    return new Promise((res) => {
+      try {
+        const r = indexedDB.open('miarmario', 1);
+        r.onupgradeneeded = () => { const d = r.result; ['kv', 'items', 'looks'].forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: s === 'kv' ? 'k' : 'id' }); }); };
+        r.onsuccess = () => { this.db = r.result; res(true); };
+        r.onerror = () => res(false);
+      } catch (e) { res(false); }
+    });
+  },
+  tx(store, mode, fn) {
+    if (!this.db) return Promise.resolve(fn(null));
+    return new Promise((res, rej) => { const t = this.db.transaction(store, mode); const st = t.objectStore(store); const r = fn(st); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); });
+  },
+  async all(store) { if (!this.db) return Object.values(this.mem[store]); return this.tx(store, 'readonly', st => st.getAll()); },
+  async put(store, v) { if (!this.db) { this.mem[store][v.k || v.id] = v; return; } return this.tx(store, 'readwrite', st => st.put(v)); },
+  async del(store, id) { if (!this.db) { delete this.mem[store][id]; return; } return this.tx(store, 'readwrite', st => st.delete(id)); },
+  async clear(store) { if (!this.db) { this.mem[store] = {}; return; } return this.tx(store, 'readwrite', st => st.clear()); }
+};
+
+/* ---------- catálogo ---------- */
+// [id, nombre, emoji, color(hex), neutro, familia]
+const COLORS = [
+  ['blanco','Blanco','#FFFFFF',1,'n'],['crema','Crema','#F3E9D7',1,'n'],['beige','Beige','#D9C4A3',1,'n'],
+  ['camel','Camel','#B98552',1,'n'],['marron','Marrón','#6B4226',1,'n'],['negro','Negro','#1E1B1A',1,'n'],
+  ['gris','Gris','#9C9A98',1,'n'],['marino','Azul marino','#1F2F5A',1,'n'],['denim','Vaquero','#4F72A6',1,'n'],
+  ['klein','Azul Klein','#1F3BD1',0,'azul'],['celeste','Celeste','#9CC9EA',0,'azul'],
+  ['botella','Verde botella','#1F4D3A',0,'verde'],['oliva','Verde oliva','#707A3A',0,'verde'],['menta','Verde menta','#A8DEC6',0,'verde'],
+  ['burdeos','Burdeos','#7A1F2B',0,'rojo'],['rojo','Rojo','#C8102E',0,'rojo'],
+  ['rosaemp','Rosa empolvado','#E8C5C1',0,'rosa'],['rosa','Rosa','#F29BB5',0,'rosa'],['fucsia','Fucsia','#D6247D',0,'rosa'],
+  ['berenjena','Berenjena','#4E2A4F',0,'morado'],['lila','Lila','#C3A6D8',0,'morado'],
+  ['naranja','Naranja','#EE7A30',0,'calido'],['ocre','Ocre / mostaza','#C99A2E',0,'calido'],['amarillo','Amarillo','#F2D04B',0,'calido'],
+  ['dorado','Dorado','#CFA94F',1,'n'],['plateado','Plateado','#C4C4C8',1,'n'],['multi','Multicolor','multi',0,'multi']
+];
+const COL = Object.fromEntries(COLORS.map(c => [c[0], { id: c[0], name: c[1], hex: c[2], n: !!c[3], fam: c[4] }]));
+const GOOD = new Set();
+['burdeos-rosaemp','burdeos-oliva','burdeos-ocre','burdeos-berenjena','oliva-ocre','oliva-naranja','botella-ocre','botella-burdeos','botella-rosaemp',
+ 'klein-rosa','klein-celeste','klein-ocre','klein-rojo','celeste-rosa','celeste-amarillo','lila-menta','lila-rosaemp','rosa-rojo','fucsia-naranja','berenjena-rosaemp',
+ 'berenjena-ocre','rojo-celeste','naranja-celeste','menta-rosa','fucsia-rojo','lila-amarillo','oliva-rosaemp','burdeos-celeste'].forEach(p => { const [a, b] = p.split('-'); GOOD.add(a + '|' + b); GOOD.add(b + '|' + a); });
+const DARK = ['negro','marino','gris','marron','berenjena','botella','burdeos'];
+const PATTERNS = [['liso','Liso'],['rayas','Rayas'],['cuadros','Cuadros'],['flores','Flores'],['lunares','Lunares'],['animal','Animal print'],['geometrico','Geométrico'],['otro','Otro']];
+const FABRICS = [['algodon','Algodón'],['lino','Lino'],['lana','Lana'],['punto','Punto'],['vaquero','Vaquero'],['cuero','Cuero'],['ante','Ante'],['pana','Pana'],['saten','Satén'],['seda','Seda'],['encaje','Encaje'],['terciopelo','Terciopelo'],['pelo','Pelo sintético'],['lentejuelas','Lentejuelas'],['sintetico','Sintético']];
+
+// [id, nombre, emoji, hueco, sección, género(u/f/m), estaciones(p v o), formalidad 1-5, flags, familia]
+const T = [
+  ['cam_mc','Camiseta manga corta','👕','top','ropa','u','pv',2,'','Camisetas y tops'],
+  ['cam_ml','Camiseta manga larga','👕','top','ropa','u','po',2,'','Camisetas y tops'],
+  ['cam_basica','Camiseta básica','👕','top','ropa','u','pvo',2,'','Camisetas y tops'],
+  ['tirantes','Top de tirantes','🎽','top','ropa','f','v',2,'strap','Camisetas y tops'],
+  ['top_lencero','Top lencero / satinado','👚','top','ropa','f','pv',3,'strap','Camisetas y tops'],
+  ['crop','Crop top','👚','top','ropa','f','v',2,'','Camisetas y tops'],
+  ['palabra','Top palabra de honor','👚','top','ropa','f','v',3,'strap','Camisetas y tops'],
+  ['body','Body','👚','top','ropa','f','po',3,'','Camisetas y tops'],
+  ['sin_mangas','Camiseta sin mangas','🎽','top','ropa','m','v',1,'','Camisetas y tops'],
+  ['polo','Polo','👕','top','ropa','u','pv',2,'','Camisetas y tops'],
+  ['blusa','Blusa','👚','top','ropa','f','pvo',3,'','Camisas y blusas'],
+  ['blusa_sat','Blusa satinada','👚','top','ropa','f','po',4,'','Camisas y blusas'],
+  ['camisa','Camisa','👔','top','ropa','u','pvo',3,'','Camisas y blusas'],
+  ['camisa_lino','Camisa de lino','👔','top','ropa','u','v',3,'','Camisas y blusas'],
+  ['camisa_vaq','Camisa vaquera','👔','top','ropa','u','po',2,'','Camisas y blusas'],
+  ['camisa_franela','Camisa de franela','👔','top','ropa','u','o',2,'','Camisas y blusas'],
+  ['jersey_fino','Jersey fino','🧶','top','ropa','u','po',3,'','Jerséis y punto'],
+  ['jersey','Jersey de punto grueso','🧶','top','ropa','u','o',2,'','Jerséis y punto'],
+  ['cuello_alto','Jersey de cuello alto','🧶','top','ropa','u','o',3,'','Jerséis y punto'],
+  ['cardigan_fino','Cárdigan fino','🧶','top','ropa','u','pv',3,'','Jerséis y punto'],
+  ['cardigan','Cárdigan grueso','🧶','top','ropa','u','o',2,'','Jerséis y punto'],
+  ['chaleco_punto','Chaleco de punto','🧶','top','ropa','u','po',3,'','Jerséis y punto'],
+  ['sudadera','Sudadera','👕','top','ropa','u','po',2,'','Jerséis y punto'],
+  ['vaqueros','Vaqueros','👖','bottom','ropa','u','pvo',2,'','Pantalones'],
+  ['vaqueros_anchos','Vaqueros anchos','👖','bottom','ropa','u','pvo',2,'','Pantalones'],
+  ['chinos','Chinos','👖','bottom','ropa','u','pvo',3,'','Pantalones'],
+  ['pinza','Pantalón de pinza / sastre','👖','bottom','ropa','u','pvo',4,'','Pantalones'],
+  ['pantalon_lino','Pantalón de lino','👖','bottom','ropa','u','v',3,'','Pantalones'],
+  ['palazzo','Pantalón palazzo','👖','bottom','ropa','f','pv',3,'','Pantalones'],
+  ['culotte','Pantalón culotte','👖','bottom','ropa','f','p',3,'','Pantalones'],
+  ['pana','Pantalón de pana','👖','bottom','ropa','u','o',2,'','Pantalones'],
+  ['leggings','Leggings','👖','bottom','ropa','f','o',2,'','Pantalones'],
+  ['shorts','Shorts','🩳','bottom','ropa','u','v',2,'short','Pantalones'],
+  ['bermudas','Bermudas','🩳','bottom','ropa','u','v',2,'','Pantalones'],
+  ['falda_corta','Falda corta','👗','bottom','ropa','f','pv',2,'short skirt','Faldas'],
+  ['falda_midi','Falda midi','👗','bottom','ropa','f','pvo',3,'skirt','Faldas'],
+  ['falda_larga','Falda larga','👗','bottom','ropa','f','pvo',3,'skirt','Faldas'],
+  ['falda_vaquera','Falda vaquera','👗','bottom','ropa','f','pv',2,'skirt','Faldas'],
+  ['falda_cuero','Falda de cuero','👗','bottom','ropa','f','o',3,'skirt','Faldas'],
+  ['falda_punto','Falda de punto','👗','bottom','ropa','f','o',3,'skirt','Faldas'],
+  ['vestido_corto','Vestido corto','👗','full','ropa','f','v',3,'short dress','Vestidos y monos'],
+  ['vestido_tirantes','Vestido de tirantes','👗','full','ropa','f','v',3,'strap dress','Vestidos y monos'],
+  ['vestido_largo','Vestido largo / ibicenco','👗','full','ropa','f','v',3,'dress','Vestidos y monos'],
+  ['vestido_camisero','Vestido camisero','👗','full','ropa','f','pv',3,'dress','Vestidos y monos'],
+  ['vestido_midi','Vestido midi','👗','full','ropa','f','pvo',4,'dress','Vestidos y monos'],
+  ['vestido_punto','Vestido de punto','👗','full','ropa','f','o',3,'dress','Vestidos y monos'],
+  ['vestido_ml','Vestido manga larga','👗','full','ropa','f','po',4,'dress','Vestidos y monos'],
+  ['vestido_negro','Vestido negro básico','👗','full','ropa','f','pvo',4,'dress','Vestidos y monos'],
+  ['vestido_terciopelo','Vestido de terciopelo','👗','full','ropa','f','o',5,'dress','Vestidos y monos'],
+  ['vestido_fiesta','Vestido de fiesta','👗','full','ropa','f','pvo',5,'dress','Vestidos y monos'],
+  ['vestido_gala','Vestido largo de gala','👗','full','ropa','f','pvo',5,'dress','Vestidos y monos'],
+  ['mono_corto','Mono corto','👗','full','ropa','f','v',2,'short','Vestidos y monos'],
+  ['mono_largo','Mono largo','👗','full','ropa','f','pv',3,'','Vestidos y monos'],
+  ['traje_falda','Traje de falda','🧥','full','ropa','f','po',4,'skirt suit','Trajes'],
+  ['traje','Traje de chaqueta','🤵','full','ropa','u','pvo',5,'suit','Trajes'],
+  ['bikini','Bikini','👙','swim','ropa','f','v',1,'','Baño'],
+  ['banador','Bañador','🩱','swim','ropa','u','v',1,'','Baño'],
+  ['pareo','Pareo / caftán','🏝️','cover','ropa','f','v',1,'','Baño'],
+  ['camisa_playa','Camisa de playa','🌴','cover','ropa','m','v',1,'','Baño'],
+  ['kimono','Kimono','👘','outer','abrigos','f','v',2,'light','Verano'],
+  ['chaq_lino','Chaqueta de lino','🧥','outer','abrigos','u','v',3,'light','Verano'],
+  ['trench','Gabardina / trench','🧥','outer','abrigos','u','po',4,'mid rain','Entretiempo'],
+  ['cazadora_vaq','Cazadora vaquera','🧥','outer','abrigos','u','pv',2,'mid','Entretiempo'],
+  ['biker','Cazadora de cuero','🧥','outer','abrigos','u','po',3,'mid','Entretiempo'],
+  ['bomber','Bomber','🧥','outer','abrigos','u','po',2,'mid','Entretiempo'],
+  ['sobrecamisa','Sobrecamisa','🧥','outer','abrigos','u','po',2,'mid','Entretiempo'],
+  ['blazer','Americana / blazer','🧥','outer','abrigos','u','pvo',4,'mid blazer','Entretiempo'],
+  ['chaleco_acolch','Chaleco acolchado','🦺','outer','abrigos','u','po',2,'mid','Entretiempo'],
+  ['cazadora_ante','Cazadora de ante','🧥','outer','abrigos','u','po',3,'mid suede','Entretiempo'],
+  ['abrigo_largo','Abrigo largo de paño','🧥','outer','abrigos','u','o',4,'warm','Invierno'],
+  ['abrigo_corto','Abrigo corto','🧥','outer','abrigos','u','o',3,'warm','Invierno'],
+  ['plumifero','Plumífero','🧥','outer','abrigos','u','o',2,'warm rain','Invierno'],
+  ['parka','Parka','🧥','outer','abrigos','u','o',2,'warm rain','Invierno'],
+  ['abrigo_pelo','Abrigo de pelo sintético','🧥','outer','abrigos','f','o',3,'warm','Invierno'],
+  ['chaqueton','Chaquetón marinero','🧥','outer','abrigos','u','o',3,'warm','Invierno'],
+  ['poncho','Capa / poncho','🧣','outer','abrigos','f','o',3,'warm','Invierno'],
+  ['impermeable','Chubasquero','🌂','outer','abrigos','u','pvo',1,'mid rain','Lluvia'],
+  ['sandalias','Sandalias planas','🩴','shoes','calzado','u','v',2,'open comfy','Sandalias'],
+  ['sandalias_tacon','Sandalias de tacón','👡','shoes','calzado','f','v',4,'open heel','Sandalias'],
+  ['cunas','Cuñas','👡','shoes','calzado','f','v',3,'open heel','Sandalias'],
+  ['alpargatas','Alpargatas','🥿','shoes','calzado','u','v',2,'comfy','Sandalias'],
+  ['chanclas','Chanclas','🩴','shoes','calzado','u','v',1,'open','Sandalias'],
+  ['lona','Zapatillas de lona','👟','shoes','calzado','u','pv',2,'comfy','Zapatillas'],
+  ['zapatillas_blancas','Zapatillas blancas','👟','shoes','calzado','u','pvo',2,'comfy','Zapatillas'],
+  ['deportivas','Deportivas de calle','👟','shoes','calzado','u','pvo',2,'comfy','Zapatillas'],
+  ['nauticos','Náuticos','👞','shoes','calzado','u','pv',3,'comfy','Zapatos'],
+  ['mocasines','Mocasines','👞','shoes','calzado','u','pvo',3,'comfy','Zapatos'],
+  ['bailarinas','Bailarinas','🥿','shoes','calzado','f','pv',3,'comfy','Zapatos'],
+  ['salones','Salones / tacón','👠','shoes','calzado','f','pvo',4,'heel','Zapatos'],
+  ['slingback','Destalonados','👠','shoes','calzado','f','pv',4,'heel','Zapatos'],
+  ['cordones','Zapatos de cordones','👞','shoes','calzado','u','po',4,'','Zapatos'],
+  ['zapato_vestir','Zapato de vestir','👞','shoes','calzado','m','pvo',5,'','Zapatos'],
+  ['botines','Botines','👢','shoes','calzado','u','po',3,'','Botas'],
+  ['botines_tacon','Botines de tacón','👢','shoes','calzado','f','o',4,'heel','Botas'],
+  ['botas_altas','Botas altas','👢','shoes','calzado','f','o',4,'','Botas'],
+  ['mosqueteras','Botas mosqueteras','👢','shoes','calzado','f','o',4,'heel','Botas'],
+  ['chelsea','Botas chelsea','👢','shoes','calzado','u','o',3,'','Botas'],
+  ['botas_montana','Botas de montaña','🥾','shoes','calzado','u','o',1,'comfy outdoor rain','Botas'],
+  ['botas_agua','Botas de agua','👢','shoes','calzado','u','po',1,'rain','Botas'],
+  ['shopper','Bolso grande / shopper','👜','bag','compl','u','pvo',3,'','Bolsos'],
+  ['bandolera','Bandolera','👝','bag','compl','u','pvo',2,'','Bolsos'],
+  ['bolso_mano','Bolso de mano','👜','bag','compl','f','pvo',4,'','Bolsos'],
+  ['clutch','Clutch de fiesta','👛','bag','compl','f','pvo',5,'','Bolsos'],
+  ['mochila','Mochila','🎒','bag','compl','u','pvo',1,'','Bolsos'],
+  ['rafia','Bolso de rafia','🧺','bag','compl','f','v',2,'','Bolsos'],
+  ['rinonera','Riñonera','👝','bag','compl','u','pvo',1,'','Bolsos'],
+  ['gafas_sol','Gafas de sol','🕶️','eyes','compl','u','pvo',2,'sun','Cabeza'],
+  ['sombrero_paja','Sombrero de paja','👒','head','compl','u','v',2,'sun','Cabeza'],
+  ['gorra','Gorra','🧢','head','compl','u','pvo',1,'sun','Cabeza'],
+  ['gorro','Gorro de lana','🧶','head','compl','u','o',2,'cold','Cabeza'],
+  ['tocado','Tocado / pamela','👒','head','compl','f','pvo',5,'wed','Cabeza'],
+  ['panuelo','Pañuelo','🧣','neck','compl','u','pvo',3,'','Cuello'],
+  ['bufanda','Bufanda','🧣','neck','compl','u','o',2,'cold','Cuello'],
+  ['corbata','Corbata','👔','neck','compl','m','pvo',5,'','Cuello'],
+  ['collar','Collar','📿','neck','compl','u','pvo',3,'jewel','Joyas y reloj'],
+  ['pendientes','Pendientes','💎','ears','compl','f','pvo',3,'jewel','Joyas y reloj'],
+  ['pulsera','Pulsera','📿','wrist','compl','u','pvo',3,'jewel','Joyas y reloj'],
+  ['reloj','Reloj','⌚','wrist','compl','u','pvo',3,'','Joyas y reloj'],
+  ['cinturon','Cinturón','🪢','waist','compl','u','pvo',3,'','Otros'],
+  ['medias','Medias','🧦','legs','compl','f','po',3,'','Otros'],
+  ['guantes','Guantes','🧤','hands','compl','u','o',2,'cold','Otros'],
+  ['top_dep','Top deportivo','🎽','top','deporte','f','pvo',1,'sport','Arriba'],
+  ['cam_tecnica','Camiseta técnica','🎽','top','deporte','u','pvo',1,'sport','Arriba'],
+  ['mallas_largas','Mallas largas','👖','bottom','deporte','u','po',1,'sport','Abajo'],
+  ['mallas_cortas','Mallas cortas / ciclistas','🩳','bottom','deporte','f','pv',1,'sport','Abajo'],
+  ['pantalon_dep','Pantalón corto deportivo','🩳','bottom','deporte','u','pv',1,'sport','Abajo'],
+  ['chandal','Pantalón de chándal','👖','bottom','deporte','u','po',1,'sport','Abajo'],
+  ['sudadera_tec','Sudadera técnica','🧥','outer','deporte','u','po',1,'sport mid','Capas'],
+  ['cortavientos','Cortavientos','🧥','outer','deporte','u','pvo',1,'sport mid rain','Capas'],
+  ['zap_running','Zapatillas de running','👟','shoes','deporte','u','pvo',1,'sport comfy','Calzado'],
+  ['zap_padel','Zapatillas de pádel','👟','shoes','deporte','u','pvo',1,'sport comfy','Calzado'],
+  ['bolsa_dep','Bolsa de deporte','🎒','bag','deporte','u','pvo',1,'sport','Otros'],
+  ['banador_dep','Bañador deportivo','🩱','swim','deporte','u','pvo',1,'sport','Otros']
+];
+const TYPES = Object.fromEntries(T.map(a => [a[0], { id: a[0], name: a[1], emoji: a[2], slot: a[3], sec: a[4], g: a[5], seasons: a[6], f: a[7], fl: a[8] ? a[8].split(' ') : [], fam: a[9] }]));
+const SECS = [['ropa','Ropa','👚','#E8729B'],['abrigos','Abrigos','🧥','#B98552'],['calzado','Calzado','👟','#5B8DEF'],['compl','Complementos','👜','#9C7BD6'],['deporte','Deporte','🏋️','#5FA36B']];
+const SEASONS = [['p','Primavera','🌸','#5FA36B'],['v','Verano','☀️','#F29A2E'],['o','Otoño-Invierno','🍂','#7A1F2B']];
+const OCC = [['trabajo','Trabajo'],['social','Planes'],['celebr','Celebraciones'],['ocio','Ocio'],['deporte','Deporte']];
+const FAM_COLORS = ['#E8729B','#F29A2E','#5B8DEF','#5FA36B','#9C7BD6','#2FA39A','#F2735E','#C99A2E'];
+
+// eventos: [id, nombre, emoji, grupo, fmin, fmax, exterior(0 dentro,1 fuera,2 mixto), flags]
+const EVENTS = [
+  ['of_formal','Oficina formal','💼','trabajo',4,5,0,'work'],
+  ['of_casual','Oficina casual','💻','trabajo',3,3,0,'work'],
+  ['reunion','Reunión / entrevista','🤝','trabajo',4,5,0,'work sober'],
+  ['uniforme','Ir al trabajo','🚗','trabajo',2,2,2,'comfy'],
+  ['tele','Teletrabajo','🏠','trabajo',2,3,0,'comfy'],
+  ['cafe','Café / desayuno','☕','social',2,3,2,''],
+  ['amigas','Comida con amigas','🥗','social',2,3,2,''],
+  ['terraceo','Terraceo / vermut','🍹','social',2,3,1,''],
+  ['cena_inf','Cena informal','🍕','social',3,3,0,''],
+  ['cena','Cena elegante','🍷','social',4,4,0,'smallbag'],
+  ['cita','Cita','💘','social',3,4,0,'date'],
+  ['copas','Afterwork / copas','🍸','social',3,4,0,''],
+  ['fiesta','Fiesta / discoteca','🪩','social',4,4,0,'party smallbag'],
+  ['concierto','Concierto','🎸','social',2,3,2,'comfy smallbag'],
+  ['familia','Comida familiar','🎂','social',3,3,0,''],
+  ['boda_dia','Boda de día','💐','celebr',5,5,2,'nowhite wed party'],
+  ['boda_noche','Boda de noche','💍','celebr',5,5,0,'nowhite party smallbag'],
+  ['comunion','Comunión / bautizo','🕊️','celebr',4,4,2,''],
+  ['graduacion','Graduación / acto','🎓','celebr',4,4,0,''],
+  ['empresa','Cena de empresa','🥂','celebr',4,4,0,''],
+  ['nochevieja','Nochevieja','🎆','celebr',4,5,0,'party smallbag'],
+  ['funeral','Funeral','🖤','celebr',4,4,2,'dark sober'],
+  ['casual','Día a día','🌤️','ocio',2,2,2,''],
+  ['compras','Paseo / compras','🛍️','ocio',2,2,1,'comfy'],
+  ['parque','Parque con niños','🛝','ocio',2,2,1,'comfy kids'],
+  ['cine','Cine','🎬','ocio',2,2,0,'layer'],
+  ['teatro','Teatro / ópera','🎭','ocio',3,4,0,''],
+  ['playa','Playa','🏖️','ocio',1,1,1,'beach'],
+  ['piscina','Piscina','🏊','ocio',1,1,1,'beach'],
+  ['campo','Campo / excursión','🥾','ocio',1,2,1,'comfy outdoor nowhite'],
+  ['viaje','Viaje','✈️','ocio',2,2,2,'comfy layer'],
+  ['gym','Gym','🏋️','deporte',1,1,0,'sport'],
+  ['running','Running','🏃','deporte',1,1,1,'sport'],
+  ['yoga','Yoga / pilates','🧘','deporte',1,1,0,'sport noshoes'],
+  ['padel','Pádel / tenis','🎾','deporte',1,1,1,'sport'],
+  ['natacion','Natación','🏊‍♀️','deporte',1,1,0,'swim'],
+  ['casa','Por casa','🛋️','casa',1,2,0,'comfy'],
+  ['recados','Recados / súper','🛒','casa',2,2,1,'comfy'],
+  ['medico','Médico / gestiones','🏥','casa',2,2,2,'comfy']
+].map(e => ({ id: e[0], name: e[1], emoji: e[2], grp: e[3], fmin: e[4], fmax: e[5], out: e[6], fl: e[7] ? e[7].split(' ') : [] }));
+const GROUPS = { trabajo: ['Trabajo','#5B8DEF'], social: ['Planes','#F2735E'], celebr: ['Celebraciones','#E8729B'], ocio: ['Ocio y día a día','#E9A23F'], deporte: ['Deporte','#5FA36B'], casa: ['Casa y recados','#9C7BD6'], custom: ['Mis eventos','#2FA39A'] };
+
+// tendencias otoño-invierno 2026-27
+const TRENDS = [
+  { id:'burdeos', t:'Burdeos', s:'El color de la temporada', e:'🍷', a:'#7A1F2B', b:'#C2414F', g:'u', m:i => i.color === 'burdeos' || i.color2 === 'burdeos' },
+  { id:'berenjena', t:'Berenjena', s:'Profundo y elegante', e:'🍆', a:'#4E2A4F', b:'#9A5C9C', g:'u', m:i => i.color === 'berenjena' || i.color2 === 'berenjena' },
+  { id:'cuadros', t:'Cuadros y tartán', s:'Lo más visto en pasarela', e:'🏴', a:'#8C3B2A', b:'#D9894A', g:'u', m:i => i.pattern === 'cuadros' },
+  { id:'verde', t:'Verde oliva y botella', s:'El verde que lo combina todo', e:'🫒', a:'#4F5A22', b:'#8E9A4C', g:'u', m:i => ['oliva','botella'].includes(i.color) || ['oliva','botella'].includes(i.color2) },
+  { id:'cuero', t:'Cuero marrón', s:'Chaquetas y faldas con carácter', e:'🧥', a:'#5A3418', b:'#B07A47', g:'u', m:i => i.fabric === 'cuero' && ['marron','camel','beige'].includes(i.color) },
+  { id:'pelo', t:'Pelo sintético', s:'Abrigos que abrazan', e:'🐻', a:'#8A6A52', b:'#D4B391', g:'u', m:i => i.fabric === 'pelo' || i.type === 'abrigo_pelo' },
+  { id:'punto', t:'Punto y textura', s:'Volumen y relieve', e:'🧶', a:'#C98B5E', b:'#EBC79E', g:'u', m:i => ['punto','lana'].includes(i.fabric) || ['jersey','cuello_alto','cardigan','vestido_punto','falda_punto','chaleco_punto'].includes(i.type) },
+  { id:'botas', t:'Botas altas', s:'Por encima de la rodilla', e:'👢', a:'#3B2A22', b:'#8A5A3E', g:'f', m:i => ['botas_altas','mosqueteras'].includes(i.type) },
+  { id:'animal', t:'Animal print', s:'Sigue pisando fuerte', e:'🐆', a:'#A0692A', b:'#E3B061', g:'u', m:i => i.pattern === 'animal' },
+  { id:'klein', t:'Azul Klein', s:'Un golpe de color', e:'💙', a:'#1F3BD1', b:'#5B8DEF', g:'u', m:i => i.color === 'klein' || i.color2 === 'klein' },
+  { id:'rojo', t:'Rojo', s:'Para ella y para él', e:'❤️', a:'#A50F27', b:'#F2735E', g:'u', m:i => i.color === 'rojo' },
+  { id:'encaje', t:'Encaje', s:'Romántico y con transparencias', e:'🤍', a:'#B98EA0', b:'#EBD1DB', g:'f', m:i => i.fabric === 'encaje' },
+  { id:'traje', t:'Traje de falda', s:'Invadió las pasarelas', e:'💃', a:'#5B4A7A', b:'#9C7BD6', g:'f', m:i => i.type === 'traje_falda' },
+  { id:'sastre', t:'Sastrería minimal', s:'Líneas rectas, estilo 90s', e:'🧥', a:'#3E4452', b:'#8D96A8', g:'u', m:i => ['pinza','blazer','abrigo_largo','traje'].includes(i.type) },
+  { id:'tierra', t:'Tonos tierra y moca', s:'Adiós al negro de siempre', e:'🤎', a:'#6B4226', b:'#C9A07A', g:'u', m:i => ['marron','camel','ocre'].includes(i.color) },
+  { id:'ante', t:'Ante', s:'Sobrecamisas y cazadoras suaves', e:'🍂', a:'#8E5B33', b:'#CF9A63', g:'u', m:i => i.fabric === 'ante' || i.type === 'cazadora_ante' }
+];
+
+const EXCL = [
+  { id:'heel', l:'Tacones', f:t => t.fl.includes('heel') },
+  { id:'skirt', l:'Faldas', f:t => t.fl.includes('skirt') },
+  { id:'short', l:'Faldas cortas y shorts', f:t => t.fl.includes('short') },
+  { id:'strap', l:'Tirantes', f:t => t.fl.includes('strap') },
+  { id:'crop', l:'Crop tops', f:t => t.id === 'crop' },
+  { id:'dress', l:'Vestidos', f:t => t.fl.includes('dress') },
+  { id:'animal', l:'Animal print', fi:i => i.pattern === 'animal' },
+  { id:'cuero', l:'Cuero', fi:i => i.fabric === 'cuero' }
+];
+const STYLES = ['Clásico','Casual','Elegante','Deportivo','Boho','Minimalista','Atrevido','Romántico'];
+const JOBS = [['uniforme','Uso uniforme','👮'],['formal','Oficina formal','💼'],['casual','Oficina casual','💻'],['tele','Teletrabajo','🏠'],['fisico','Trabajo físico','🛠️'],['estudio','Estudio','📚'],['no','Ahora no trabajo','🌿']];
+const AGES = ['18-25','26-35','36-45','46-55','56+'];
+
+/* ---------- temas ---------- */
+const THEMES = { p: ['Primavera','🌸','Verdes frescos y rosa',['#3F8A55','#F28FB0','#F2B83A'],'#F5FAF2'], v: ['Verano','☀️','Coral, turquesa y sol',['#E0603A','#16A6A0','#FFD27F'],'#FFF8EC'],
+  o: ['Otoño','🍂','Burdeos y tonos tierra',['#7A1F2B','#F2735E','#E9C46A'],'#FBF4EC'], i: ['Invierno','❄️','Azul noche y lavanda',['#2B3A67','#6C8EF5','#A98BE8'],'#F2F5FB'] };
+const seasonTheme = () => { const m = new Date().getMonth(); return m >= 2 && m <= 4 ? 'p' : m >= 5 && m <= 7 ? 'v' : m >= 8 && m <= 10 ? 'o' : 'i'; };
+const themeNow = () => { const t = S.settings.theme || 'auto'; return t === 'auto' ? seasonTheme() : t; };
+function applyTheme() {
+  const t = themeNow(); document.documentElement.dataset.theme = t;
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue('--pri').trim();
+}
+function renderTheme() {
+  const cur = S.settings.theme || 'auto'; const auto = THEMES[seasonTheme()];
+  const opt = (k, name, e, sub, cols, bg) => `<button class="thopt ${cur === k ? 'on' : ''}" style="background:${bg}" onclick="setTheme('${k}')"><span style="font-size:30px">${e}</span><span style="flex:1"><b>${name}</b><small>${sub}</small></span><span class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span></button>`;
+  return `<h2 class="serif" style="margin-bottom:4px">Tema de la app</h2><p class="muted small" style="margin-bottom:14px">Elige uno fijo o deja que cambie solo con cada estación.</p>
+    ${opt('auto', 'Automático', '🔄', `Cambia con la estación · ahora ${auto[0]} ${auto[1]}`, Object.values(THEMES).map(t => t[3][0]), 'linear-gradient(120deg,#F5FAF2,#FFF8EC,#FBF4EC,#F2F5FB)')}
+    ${Object.entries(THEMES).map(([k, t]) => opt(k, t[0], t[1], t[2], t[3], t[4])).join('')}`;
+}
+async function setTheme(k) { S.settings.theme = k; await saveSettings(); applyTheme(); rs('theme'); render(); }
+
+/* ---------- estado ---------- */
+const S = {
+  profile: null, settings: { stored: [], custom: [], dayLook: null, manual: null, theme: 'auto' }, items: [], looks: [],
+  tab: 'hoy', arm: { sec: 'ropa', season: null, q: '', fav: false, wash: false, search: false },
+  lk: { tab: 'fav', grp: 'all', month: today().slice(0, 7) }, fc: null, news: [], _u: null
+};
+const currentSeason = () => { const m = new Date().getMonth(); return m >= 2 && m <= 4 ? 'p' : m >= 5 && m <= 8 ? 'v' : 'o'; };
+S.arm.season = currentSeason();
+
+async function saveProfile() { await DB.put('kv', { k: 'profile', v: S.profile }); }
+async function saveSettings() { await DB.put('kv', { k: 'settings', v: S.settings }); }
+async function saveItem(it) { const i = S.items.findIndex(x => x.id === it.id); if (i >= 0) S.items[i] = it; else S.items.push(it); await DB.put('items', it); }
+async function delItem(id) { S.items = S.items.filter(x => x.id !== id); await DB.del('items', id); }
+async function saveLook(l) { const i = S.looks.findIndex(x => x.id === l.id); if (i >= 0) S.looks[i] = l; else S.looks.push(l); S._u = null; await DB.put('looks', l); }
+async function delLook(id) { S.looks = S.looks.filter(x => x.id !== id); S._u = null; await DB.del('looks', id); }
+
+/* ---------- ayudas de prendas ---------- */
+const ty = i => TYPES[i.type] || TYPES.cam_basica;
+const itemById = id => S.items.find(x => x.id === id);
+const itemName = i => i.name || ty(i).name;
+const colorName = c => COL[c] ? COL[c].name.toLowerCase() : '';
+const gender = () => (S.profile && S.profile.gender) || 'f';
+const typeAllowed = t => t.g === 'u' || gender() === 'x' || t.g === gender();
+const evName = e => (e.id === 'amigas' && gender() === 'm') ? 'Comida con amigos' : e.name;
+const allEvents = () => EVENTS.concat(S.settings.custom || []);
+const evById = id => allEvents().find(e => e.id === id) || EVENTS.find(e => e.id === 'casual');
+const isStored = i => { const st = S.settings.stored || []; return st.length && [...i.seasons].every(s => st.includes(s)); };
+const excluded = i => (S.profile.excl || []).some(x => { const d = EXCL.find(e => e.id === x); return d && ((d.f && d.f(ty(i))) || (d.fi && d.fi(i))); });
+const avail = () => S.items.filter(i => (i.state || 'ok') === 'ok' && !isStored(i) && !excluded(i) && !(S.profile.hate || []).includes(i.color));
+const trendVisible = t => t.g === 'u' || gender() !== 'm';
+const isTrendy = i => TRENDS.some(t => trendVisible(t) && t.m(i));
+const lookIds = l => [...new Set([...(l.items || []), ...Object.values(l.slots || {})])];
+function usageMap() { if (S._u) return S._u; const m = {}; S.looks.filter(l => l.worn).forEach(l => lookIds(l).forEach(id => { const u = m[id] || (m[id] = { n: 0, last: null }); u.n++; if (!u.last || l.date > u.last) u.last = l.date; })); return (S._u = m); }
+const usage = id => usageMap()[id] || { n: 0, last: null };
+function isLight(hex) { if (!hex || hex[0] !== '#') return false; const n = parseInt(hex.slice(1), 16); const r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 > 175; }
+function patCSS(p, ink) {
+  switch (p) {
+    case 'rayas': return `repeating-linear-gradient(90deg,${ink} 0 5px,transparent 5px 13px)`;
+    case 'cuadros': return `repeating-linear-gradient(0deg,${ink} 0 4px,transparent 4px 14px),repeating-linear-gradient(90deg,${ink} 0 4px,transparent 4px 14px)`;
+    case 'lunares': return `radial-gradient(circle,${ink} 2.5px,transparent 3.5px) 0 0/13px 13px`;
+    case 'flores': return `radial-gradient(circle,#FF8FB1 3px,transparent 4px) 0 0/18px 18px,radial-gradient(circle,#FFE066 2.5px,transparent 3.5px) 9px 9px/18px 18px`;
+    case 'animal': return `radial-gradient(ellipse 5px 3.5px,rgba(40,20,0,.5) 60%,transparent 72%) 0 0/16px 14px,radial-gradient(ellipse 4px 3px,rgba(40,20,0,.4) 60%,transparent 72%) 8px 7px/16px 14px`;
+    case 'geometrico': return `linear-gradient(45deg,${ink} 25%,transparent 25%,transparent 75%,${ink} 75%) 0 0/16px 16px`;
+    default: return '';
+  }
+}
+function vis(item, cls = '') {
+  if (!item) return `<div class="vis ${cls} empty"><span class="em">＋</span></div>`;
+  if (item.photo) return `<div class="vis ${cls}"><img src="${item.photo}" alt="" loading="lazy"></div>`;
+  const c = COL[item.color] || COL.gris; const multi = c.hex === 'multi';
+  const baseG = multi ? 'linear-gradient(135deg,#F2735E,#E9B23F,#5FA36B,#5B8DEF,#9C7BD6)' : `linear-gradient(${c.hex},${c.hex})`;
+  const ink = isLight(c.hex) ? 'rgba(0,0,0,.13)' : 'rgba(255,255,255,.32)';
+  const p = item.pattern && item.pattern !== 'liso' ? patCSS(item.pattern, ink) : '';
+  return `<div class="vis ${cls}" style="background:${p ? p + ',' : ''}${baseG}"><span class="em">${ty(item).emoji}</span></div>`;
+}
+function itile(i, opts = {}) {
+  const st = { lavar: '🧺', prestada: '🤝', arreglar: '🪡' }[i.state] || '';
+  return `<div class="itile ${isStored(i) ? 'dim' : ''} ${opts.sel ? 'sel' : ''}" onclick="${opts.onclick || `openItem('${i.id}')`}">
+    ${vis(i)}${i.fav ? '<span class="fav">❤️</span>' : ''}${st ? `<span class="st">${st}</span>` : isStored(i) ? '<span class="st">📦</span>' : ''}
+    ${opts.sel ? '<span class="ck">✓</span>' : ''}
+    <div class="lbl">${esc(itemName(i))} · ${colorName(i.color)}</div></div>`;
+}
+
+/* ---------- tiempo (Open-Meteo, gratis, sin clave) ---------- */
+const RAIN_CODES = c => (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95;
+const wEmoji = c => c == null ? '🌡️' : c === 0 ? '☀️' : c <= 2 ? '🌤️' : c === 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️';
+const TC_LBL = { cold: ['Frío','🥶'], cool: ['Fresco','🍂'], mild: ['Templado','🌤️'], hot: ['Calor','☀️'] };
+const tcOf = t => t < 12 ? 'cold' : t < 18 ? 'cool' : t <= 25 ? 'mild' : 'hot';
+const monthTc = date => ['cold','cold','cool','cool','mild','hot','hot','hot','mild','cool','cool','cold'][new Date(date + 'T12:00:00').getMonth()];
+const seasonsFor = tc => ({ cold: ['o'], cool: ['p','o'], mild: ['p','v'], hot: ['v'] })[tc];
+const fitsSeason = (i, tc) => seasonsFor(tc).some(s => i.seasons.includes(s));
+const FR = { manana: ['Mañana','🌅',10], tarde: ['Tarde','🌇',17], noche: ['Noche','🌙',21] };
+
+async function ensureGeo() {
+  const p = S.profile; if (!p || p.lat || !p.city) return;
+  try {
+    const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=es&name=' + encodeURIComponent(p.city));
+    const j = await r.json(); const g = j.results && j.results[0];
+    if (g) { p.lat = g.latitude; p.lon = g.longitude; p.cityName = g.name; await saveProfile(); }
+  } catch (e) { }
+}
+async function refreshWeather(force) {
+  if (!S.profile) return;
+  if (S.fc && !force && Date.now() - S.fc.t < 3600e3) return;
+  await ensureGeo(); const p = S.profile; if (!p.lat) return;
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m&current=temperature_2m,weather_code&timezone=auto&forecast_days=16`;
+    const j = await (await fetch(u)).json();
+    if (j.hourly) { const first = !S.fc; S.fc = { t: Date.now(), h: j.hourly, cur: j.current }; if (S.tab === 'hoy' && first) render(); }
+  } catch (e) { }
+}
+function weatherAt(date, fr) {
+  const h = S.fc && S.fc.h; if (!h) return null;
+  const idx = h.time.indexOf(`${date}T${z2(FR[fr][2])}:00`); if (idx < 0) return null;
+  return { t: Math.round(h.temperature_2m[idx]), pp: h.precipitation_probability[idx] || 0, code: h.weather_code[idx], wind: h.wind_speed_10m[idx] };
+}
+function buildCtx(date, fr, opts = {}) {
+  const w = weatherAt(date, fr); const man = S.settings.manual;
+  const tc = (man && man.date === date) ? man.tc : (w ? tcOf(w.t) : monthTc(date));
+  return { date, fr, opts, w, tc, manual: !!(man && man.date === date),
+    rain: w ? (w.pp >= 50 || RAIN_CODES(w.code)) : false,
+    sun: w ? w.code <= 2 : (tc === 'hot' || tc === 'mild'), wind: w ? w.wind > 35 : false };
+}
+const ctxLabel = c => c.w && !c.manual ? `${wEmoji(c.w.code)} ${c.w.t}°${c.rain ? ' · lluvia' : ''}` : `${TC_LBL[c.tc][1]} ${TC_LBL[c.tc][0]}`;
+
+/* =========================================================
+   MOTOR DE LOOKS (reglas, sin IA)
+   ========================================================= */
+const goodPair = (a, b) => (COL[a] && COL[b] && COL[a].fam === COL[b].fam) || GOOD.has(a + '|' + b);
+function harmony(items) {
+  const cs = [...new Set(items.map(i => i.color).filter(Boolean))];
+  const nn = cs.filter(c => COL[c] && !COL[c].n && c !== 'multi'); const multi = cs.includes('multi');
+  let s = 0;
+  if (nn.length === 0) s += multi ? 1.2 : 1.4; else if (nn.length === 1) s += multi ? 0.6 : 2;
+  else if (nn.length === 2) s += goodPair(nn[0], nn[1]) ? 1.5 : -1.5; else s -= 3;
+  const pats = items.filter(i => i.pattern && i.pattern !== 'liso').length; if (pats >= 2) s -= 2;
+  return s;
+}
+function bestOf(arr, fn) { let best = null; arr.forEach(it => { const s = fn(it); if (!best || s > best.s) best = { item: it, s }; }); return best; }
+
+function generate(ev, ctx, n = 3, rng = Math.random) {
+  const fl = new Set(ev.fl); const pool = avail(); const P = S.profile;
+  const sport = fl.has('sport'), swim = fl.has('swim'), beach = fl.has('beach') || swim;
+  const comfy = fl.has('comfy') || !!ctx.opts.comoda;
+  const noHeel = comfy || !!ctx.opts.sinTacones || fl.has('kids') || fl.has('outdoor');
+  const up = ctx.opts.arreglada ? 1 : 0;
+  const comfortShift = (P.comfort ?? 50) > 65 ? -0.3 : (P.comfort ?? 50) < 35 ? 0.3 : 0;
+  const want = (ev.fmin + ev.fmax) / 2 + up - (ctx.opts.comoda ? 0.5 : 0) + comfortShift;
+  const fOk = (i, tol = 1) => i.f >= ev.fmin - tol && i.f <= ev.fmax + tol + up;
+  const sOk = i => fitsSeason(i, ctx.tc);
+  const colOk = i => !(fl.has('nowhite') && ['blanco','crema'].includes(i.color) && gender() !== 'm') && !(fl.has('dark') && !DARK.includes(i.color));
+  const pref = (arr, f) => { const r = arr.filter(f); return r.length ? r : arr; };
+  const slotOf = i => ty(i).slot; const secOf = i => ty(i).sec;
+  const forced = ctx.opts.useItem ? itemById(ctx.opts.useItem) : null;
+  const night = ctx.fr === 'noche';
+
+  let tops = [], bottoms = [], fulls = [], swims = [], covers = [];
+  if (beach) {
+    swims = pool.filter(i => slotOf(i) === 'swim');
+    swims = pref(swims, i => swim ? secOf(i) === 'deporte' : secOf(i) !== 'deporte');
+    covers = swim ? [] : pool.filter(i => slotOf(i) === 'cover');
+  } else if (sport) {
+    const sp = pool.filter(i => secOf(i) === 'deporte');
+    tops = sp.filter(i => slotOf(i) === 'top'); bottoms = sp.filter(i => slotOf(i) === 'bottom');
+    if (!tops.length) tops = pool.filter(i => ['cam_mc','cam_basica','cam_ml','sudadera','tirantes','sin_mangas'].includes(i.type));
+    if (!bottoms.length) bottoms = pool.filter(i => ['leggings','shorts','bermudas'].includes(i.type));
+    tops = pref(tops, sOk); bottoms = pref(bottoms, sOk);
+  } else {
+    const m = pool.filter(i => secOf(i) === 'ropa' && ['top','bottom','full'].includes(slotOf(i)) && colOk(i) && fOk(i) && (!comfy || i.f <= 4));
+    const enough = a => a.some(i => slotOf(i) === 'full') || (a.some(i => slotOf(i) === 'top') && a.some(i => slotOf(i) === 'bottom'));
+    let ms = m.filter(sOk); if (!enough(ms)) ms = m;
+    tops = ms.filter(i => slotOf(i) === 'top'); bottoms = ms.filter(i => slotOf(i) === 'bottom'); fulls = ms.filter(i => slotOf(i) === 'full');
+  }
+  if (forced) {
+    const sl = slotOf(forced);
+    if (sl === 'top') { tops = [forced]; fulls = []; } else if (sl === 'bottom') { bottoms = [forced]; fulls = []; }
+    else if (sl === 'full') { fulls = [forced]; tops = []; bottoms = []; } else if (sl === 'swim') swims = [forced];
+  }
+
+  // calzado
+  let shoes = [];
+  if (!fl.has('noshoes')) {
+    let sh = pool.filter(i => slotOf(i) === 'shoes');
+    if (beach) shoes = sh.filter(i => ['chanclas','sandalias','alpargatas'].includes(i.type));
+    else if (sport) { shoes = sh.filter(i => secOf(i) === 'deporte'); if (!shoes.length) shoes = sh.filter(i => ['deportivas','zapatillas_blancas'].includes(i.type)); }
+    else {
+      sh = sh.filter(i => secOf(i) !== 'deporte' && fOk(i, 1) && colOk(i));
+      if (noHeel) sh = sh.filter(i => !ty(i).fl.includes('heel'));
+      if (ctx.rain) sh = pref(sh, i => !ty(i).fl.includes('open') && i.fabric !== 'ante');
+      sh = pref(sh, sOk);
+      if (fl.has('outdoor')) sh = pref(sh, i => ty(i).fl.includes('comfy'));
+      shoes = sh;
+    }
+  }
+  if (forced && slotOf(forced) === 'shoes') shoes = [forced];
+
+  // bases (combinaciones principales)
+  let bases = [];
+  if (beach) swims.forEach(s => bases.push([s]));
+  else {
+    fulls.forEach(f => bases.push([f]));
+    let pairs = []; tops.forEach(t => bottoms.forEach(b => pairs.push([t, b])));
+    if (pairs.length > 900) pairs = shuffle(pairs, rng).slice(0, 900);
+    bases = bases.concat(pairs);
+  }
+  if (!bases.length) {
+    const msg = beach ? 'Añade un bikini o bañador a tu armario.' : sport ? 'Añade ropa de deporte (o camisetas y leggings).' :
+      'No encuentro una parte de arriba y una de abajo (o un vestido) que encaje con este plan y este tiempo.';
+    return { looks: [], missing: msg };
+  }
+
+  const scorePiece = i => {
+    let s = -Math.abs(i.f - want) * 0.7;
+    if (i.fav) s += 0.6; if (isTrendy(i)) s += 0.5;
+    if ((P.fav || []).includes(i.color)) s += 0.5;
+    if ((i.occ || []).includes(ev.grp)) s += 0.3;
+    const u = usage(i.id);
+    const d = u.last ? daysBetween(u.last, ctx.date) : 45;
+    if (u.last && d >= 0 && d < 3) s -= 1.5;
+    s += Math.min(Math.max(d, 0), 60) / 60 * 0.8;
+    if (fl.has('party') && ['saten','terciopelo','lentejuelas','encaje','seda'].includes(i.fabric)) s += 1;
+    if (fl.has('date') && (i.fav || isTrendy(i))) s += 0.5;
+    if (fl.has('kids') && ['blanco','crema'].includes(i.color)) s -= 1;
+    if (fl.has('sober') && ((i.pattern && i.pattern !== 'liso') || !COL[i.color] || !COL[i.color].n)) s -= 0.7;
+    if (ctx.wind && ['falda_corta','vestido_corto','falda_larga','vestido_largo'].includes(i.type)) s -= 0.6;
+    if (ctx.tc === 'cold' && ty(i).fl.includes('short')) s -= 1.5;
+    return s;
+  };
+  const scoreMain = pieces => harmony(pieces) + pieces.reduce((a, i) => a + scorePiece(i), 0) / pieces.length * 1.5;
+  const scoreShoe = (sh, pieces) => {
+    let s = harmony(pieces.concat(sh)) * 0.6 - Math.abs(sh.f - want) * 0.7 + (sh.fav ? 0.4 : 0) + (isTrendy(sh) ? 0.4 : 0);
+    const heel = ty(sh).fl.includes('heel');
+    if ((fl.has('party') || fl.has('wed')) && heel) s += 0.8;
+    if (comfy && ty(sh).fl.includes('comfy')) s += 0.8;
+    const hasSkirt = pieces.some(i => ty(i).fl.includes('skirt') || ty(i).fl.includes('dress'));
+    if (hasSkirt && ctx.tc === 'cold' && ty(sh).fam === 'Botas') s += 0.6;
+    if (pieces.some(i => ty(i).fl.includes('short')) && ty(sh).fam === 'Botas') s -= 0.8;
+    return s;
+  };
+
+  const scored = bases.map(b => {
+    const sh = shoes.length ? bestOf(shoes, s => scoreShoe(s, b) + rng() * 0.5) : null;
+    return { b, shoe: sh ? sh.item : null, s: scoreMain(b) + (sh ? sh.s : -0.5) + rng() * 1.3 };
+  }).sort((a, b) => b.s - a.s);
+
+  // elegir variedad
+  const picked = []; const used = new Set();
+  for (const c of scored) { if (picked.length >= n) break; if (c.b.some(i => used.has(i.id))) continue; picked.push(c); c.b.forEach(i => used.add(i.id)); }
+  for (const c of scored) { if (picked.length >= n) break; if (!picked.includes(c)) picked.push(c); }
+
+  const looks = picked.map(c => {
+    const slots = {}; c.b.forEach(i => { slots[slotOf(i)] = i.id; }); if (c.shoe) slots.shoes = c.shoe.id;
+    const pieces = c.b.concat(c.shoe ? [c.shoe] : []);
+    if (beach && covers.length && rng() > 0.25) { const cv = bestOf(covers, i => harmony(pieces.concat(i)) + rng()); if (cv) { slots.cover = cv.item.id; pieces.push(cv.item); } }
+    const outer = pickOuter(c.b, ev, ctx, pool, rng, fl, want); if (outer) { slots.outer = outer.id; pieces.push(outer); }
+    Object.assign(slots, pickAcc(pieces, slots, ev, ctx, pool, rng, fl, want));
+    return { slots, ev: ev.id, date: ctx.date, fr: ctx.fr, trendy: Object.values(slots).some(id => { const it = itemById(id); return it && isTrendy(it); }) };
+  });
+  return { looks };
+}
+
+function pickOuter(base, ev, ctx, pool, rng, fl, want) {
+  if (fl.has('beach') || fl.has('swim')) return null;
+  const sport = fl.has('sport'); const night = ctx.fr === 'noche';
+  const warmth = i => ty(i).fl.includes('warm') ? 3 : ty(i).fl.includes('mid') ? 2 : 1;
+  const hasSuit = base.some(i => ty(i).fl.includes('suit'));
+  let need = false, opt = false, range = [1, 3];
+  if (ctx.tc === 'cold') { need = true; range = [3, 3]; }
+  else if (ctx.tc === 'cool') { need = ev.out > 0 || night; opt = true; range = [2, 3]; }
+  else if (ctx.tc === 'mild') { opt = night || ev.out === 1 || fl.has('layer') || fl.has('work'); range = [1, 2]; }
+  else { opt = fl.has('layer'); range = [1, 1]; }
+  if (ctx.rain && ev.out > 0) need = true;
+  if (hasSuit && ctx.tc !== 'cold') return null;
+  if (!need && !opt) return null;
+  const c = pool.filter(i => ty(i).slot === 'outer' && (sport ? ty(i).sec === 'deporte' : ty(i).sec !== 'deporte') && (sport || (i.f >= ev.fmin - 2 && i.f <= ev.fmax + 2)));
+  let cc = c.filter(i => warmth(i) >= range[0] && warmth(i) <= range[1]);
+  if (!cc.length && need) cc = c.filter(i => warmth(i) >= range[0] - 1);
+  if (ctx.rain && ev.out > 0) { const r = cc.filter(i => ty(i).fl.includes('rain')); if (r.length) cc = r; }
+  if (!cc.length) return null;
+  const best = bestOf(cc, i => {
+    let s = harmony(base.concat(i)) * 0.6 - Math.abs(i.f - want) * 0.6 + (i.fav ? 0.4 : 0) + (isTrendy(i) ? 0.5 : 0) + rng() * 0.8;
+    if (fl.has('work') && i.type === 'blazer' && ctx.tc !== 'cold') s += 1.2;
+    if (ctx.rain && i.fabric === 'ante') s -= 3;
+    return s;
+  });
+  if (!need && best.s < 0) return null;
+  return best.item;
+}
+
+function pickAcc(pieces, slots, ev, ctx, pool, rng, fl, want) {
+  const out = {}; const sport = fl.has('sport'); const beach = fl.has('beach'); const swim = fl.has('swim');
+  const day = ctx.fr !== 'noche';
+  const of = slot => pool.filter(i => ty(i).slot === slot && (ty(i).sec !== 'deporte' || slot === 'bag'));
+  const sc = i => harmony(pieces.concat(i)) * 0.5 + (i.fav ? 0.4 : 0) + (COL[i.color] && COL[i.color].n ? 0.3 : 0) - Math.abs(i.f - want) * 0.3 + rng() * 0.8;
+  const best = arr => { const b = bestOf(arr, sc); return b ? b.item : null; };
+  // bolso
+  let pref;
+  if (sport || swim) pref = ['bolsa_dep','mochila'];
+  else if (beach) pref = ['rafia','shopper','bandolera'];
+  else if (fl.has('smallbag') || fl.has('party')) pref = ['clutch','bolso_mano','bandolera'];
+  else if (fl.has('work')) pref = ['shopper','bolso_mano','bandolera'];
+  else if (fl.has('outdoor')) pref = ['mochila','rinonera'];
+  else if (fl.has('kids') || ev.id === 'viaje') pref = ['mochila','bandolera','shopper'];
+  else if (ev.id === 'concierto') pref = ['rinonera','bandolera'];
+  else if (ev.fmax >= 4) pref = ['bolso_mano','clutch','bandolera'];
+  else pref = ['bandolera','shopper','bolso_mano','mochila','rinonera'];
+  const bags = pool.filter(i => ty(i).slot === 'bag' && pref.includes(i.type));
+  if (bags.length) { const b = bestOf(bags, i => sc(i) + (pref.length - pref.indexOf(i.type)) * 0.6); out.bag = b.item.id; }
+  // tiempo
+  if (ctx.tc === 'cold' && ev.out > 0 && !sport && !beach) {
+    const g = best(of('hands')); if (g) out.hands = g.id;
+    const sc2 = best(of('neck').filter(i => i.type === 'bufanda')); if (sc2) out.neck = sc2.id;
+    if (ev.fmax <= 3) { const h = best(of('head').filter(i => i.type === 'gorro')); if (h) out.head = h.id; }
+  }
+  if (ctx.sun && day && ev.out > 0) { const e = best(of('eyes')); if (e) out.eyes = e.id; }
+  if (!out.head && (beach || (ctx.sun && day && ev.out === 1 && ['hot','mild'].includes(ctx.tc) && ev.fmax <= 3))) {
+    const h = best(of('head').filter(i => sport ? i.type === 'gorra' : ['sombrero_paja','gorra'].includes(i.type))); if (h && (beach || rng() < 0.7)) out.head = h.id;
+  }
+  if (fl.has('wed') && day && !out.head && rng() < 0.6) { const h = best(of('head').filter(i => i.type === 'tocado')); if (h) out.head = h.id; }
+  if (!sport && !beach && !swim) {
+    if (!out.neck) {
+      const top = itemById(slots.top); const formalTop = slots.full ? ty(itemById(slots.full)).fl.includes('suit') : top && ['camisa','camisa_lino'].includes(top.type);
+      if (gender() === 'm' && ev.fmax >= 4 && formalTop) { const t = best(of('neck').filter(i => i.type === 'corbata')); if (t) out.neck = t.id; }
+      if (!out.neck && ctx.tc === 'cool' && ev.out > 0 && rng() < 0.55) { const p = best(of('neck').filter(i => i.type === 'panuelo')); if (p) out.neck = p.id; }
+      if (!out.neck && ev.fmax >= 3) { const c = best(of('neck').filter(i => i.type === 'collar')); if (c) out.neck = c.id; }
+      if (!out.neck && ev.fmax >= 3 && rng() < 0.3) { const p = best(of('neck').filter(i => i.type === 'panuelo')); if (p) out.neck = p.id; }
+    }
+    if (ev.fmax >= 3) { const e = best(of('ears')); if (e) out.ears = e.id; }
+    if (ev.fmax >= 2) { const w = best(of('wrist')); if (w) out.wrist = w.id; }
+    const bot = itemById(slots.bottom);
+    if (bot && ['vaqueros','vaqueros_anchos','chinos','pinza','pana','falda_midi','falda_cuero','falda_larga','falda_vaquera','culotte','palazzo','pantalon_lino'].includes(bot.type) && rng() < 0.55) {
+      const b = best(of('waist')); if (b) out.waist = b.id;
+    }
+    const legsy = (bot && ty(bot).fl.includes('skirt')) || (slots.full && ty(itemById(slots.full)).fl.includes('dress'));
+    if (['cold','cool'].includes(ctx.tc) && legsy && ev.fmax >= 3) { const m = best(of('legs')); if (m) out.legs = m.id; }
+  }
+  // máximo 5 complementos
+  const prio = ['bag','hands','neck','eyes','head','legs','ears','wrist','waist'];
+  const keep = prio.filter(k => out[k]).slice(0, 5); const res = {}; keep.forEach(k => res[k] = out[k]);
+  return res;
+}
+
+/* ---------- tablero del look ---------- */
+function board(look, mode = 'view', li = 0) {
+  const sl = look.slots || {};
+  const click = slot => mode === 'res' ? `onclick="swapSlot(${li},'${slot}')"` : mode === 'build' ? `onclick="buildPick('${slot}')"` : '';
+  const t = (slot, cls = '', extra = '') => {
+    const it = sl[slot] ? itemById(sl[slot]) : null;
+    if (!it && mode !== 'build') return '';
+    return `<div class="slot ${slot} ${extra}" ${click(slot)}>${vis(it, cls)}</div>`;
+  };
+  const showMain = mode === 'build' ? (look.mode || 'pair') : (sl.full ? 'full' : sl.swim ? 'swim' : 'pair');
+  let mid = t('head');
+  if (showMain === 'full') mid += `<div class="pair">${t('full', 'tall')}${t('outer')}</div>`;
+  else if (showMain === 'swim') mid += `<div class="pair">${t('swim')}${t('cover')}</div>`;
+  else mid += `<div class="pair">${t('top')}${t('outer')}</div>${t('bottom', 'tall')}`;
+  mid += t('shoes');
+  const left = ['eyes','neck','waist','legs'].map(s => t(s)).join('');
+  const right = ['ears','bag','wrist','hands'].map(s => t(s)).join('');
+  return `<div class="board ${mode === 'mini' ? 'mini' : ''}"><div class="side">${left}</div><div class="mid">${mid}</div><div class="side">${right}</div></div>`;
+}
+
+/* ---------- hojas (pantallas superpuestas) ---------- */
+const SH = [];
+function openSheet(id, fn, modal = false) {
+  const prev = SH.findIndex(x => x.id === id); if (prev >= 0) { SH[prev].el.remove(); SH.splice(prev, 1); }
+  const el = document.createElement('div'); el.className = modal ? 'msheet' : 'sheet';
+  el.innerHTML = modal ? `<div class="box">${fn()}</div>` : `<div class="inner">${fn()}</div>`;
+  if (modal) el.addEventListener('click', e => { if (e.target === el) closeSheet(id); });
+  document.body.appendChild(el); SH.push({ id, fn, el, modal }); document.body.style.overflow = 'hidden';
+}
+function rs(id) { const s = SH.find(x => x.id === id); if (!s) return; const box = s.el.firstElementChild; const a = s.el.scrollTop, b = box.scrollTop; box.innerHTML = s.fn(); s.el.scrollTop = a; box.scrollTop = b; }
+function closeSheet(id, norender) { const i = SH.findIndex(x => x.id === id); if (i < 0) return; SH[i].el.remove(); SH.splice(i, 1); if (!SH.length) document.body.style.overflow = ''; if (!norender) render(); }
+const sheetHdr = (title, id, right = '') => `<div class="sh-hdr"><button class="icon-btn" onclick="closeSheet('${id}')">‹</button><h2>${title}</h2>${right || '<span style="width:40px"></span>'}</div>`;
+
+/* =========================================================
+   NAVEGACIÓN Y PANTALLAS
+   ========================================================= */
+function go(t) { S.tab = t; render(); window.scrollTo(0, 0); }
+function render() {
+  document.querySelectorAll('#nav button[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === S.tab));
+  if (!S.profile || !S.profile.done) return;
+  const f = { hoy: renderHoy, armario: renderArmario, looks: renderLooks, perfil: renderPerfil }[S.tab];
+  $('#app').innerHTML = f();
+  if (S.tab === 'armario') renderArmGrid();
+}
+
+/* ---------- INICIO ---------- */
+function dayEventId() {
+  const wd = new Date().getDay(); if (wd === 0 || wd === 6) return 'casual';
+  return { uniforme: 'uniforme', formal: 'of_formal', casual: 'of_casual', tele: 'tele', fisico: 'uniforme', estudio: 'casual', no: 'casual' }[S.profile.job] || 'casual';
+}
+function dayLook(force) {
+  const date = today(); const evId = dayEventId(); let dl = S.settings.dayLook;
+  const broken = dl && Object.values(dl.slots || {}).some(id => !itemById(id));
+  if (force || !dl || dl.date !== date || dl.ev !== evId || broken || (!dl.hadW && S.fc) || dl.n !== S.items.length) {
+    const ctx = buildCtx(date, 'manana');
+    const rng = mulberry(date + (force ? Math.random() : '') + S.items.length);
+    const r = generate(evById(evId), ctx, 1, rng);
+    dl = r.looks[0] ? { ...r.looks[0], date, ev: evId, hadW: !!S.fc, n: S.items.length } : { date, ev: evId, slots: null, missing: r.missing, hadW: !!S.fc, n: S.items.length };
+    S.settings.dayLook = dl; saveSettings();
+  }
+  return dl;
+}
+function trendCards() {
+  const pool = S.items;
+  return TRENDS.filter(trendVisible).map(t => ({ t, n: pool.filter(t.m).length })).sort((a, b) => b.n - a.n)
+    .map(({ t, n }) => `<button class="trend" style="--a:${t.a};--b:${t.b}" onclick="openTrend('${t.id}')"><span class="ring"></span><span class="big">${t.e}</span><b>${t.t}</b><small>${t.s}</small>${n ? `<span class="badge">Tienes ${n} prenda${n > 1 ? 's' : ''}</span>` : '<span class="badge" style="opacity:.75">Aún no tienes</span>'}</button>`).join('');
+}
+function renderHoy() {
+  const P = S.profile; const h = new Date().getHours();
+  const greet = h < 14 ? 'Buenos días,' : h < 21 ? 'Buenas tardes,' : 'Buenas noches,';
+  const cur = S.fc && S.fc.cur;
+  let html = `<div class="hdr"><div class="hello"><small>${greet} ${THEMES[themeNow()][1]}</small><h1>${esc(P.name || 'tú')}</h1></div>
+    <button class="wpill" onclick="weatherTap(today())"><div class="wt">${cur ? `${wEmoji(cur.weather_code)} <b>${Math.round(cur.temperature_2m)}°</b>` : '🌡️ <b>--</b>'}</div><div>${esc(P.cityName || P.city || 'Elige ciudad')}</div></button></div>`;
+  if (!S.items.length) {
+    html += `<div class="card empty-card"><div class="e">👗✨</div><h2 style="margin:8px 0">Tu armario está vacío</h2>
+      <p class="muted small">Añade unas cuantas prendas (mínimo una parte de arriba, una de abajo y unos zapatos) y te preparo tu primer look.</p>
+      <div class="row" style="justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn btn-pri" onclick="openAdd()">＋ Añadir prenda</button><button class="btn" onclick="loadDemo()">Probar con ejemplo</button></div></div>`;
+  } else {
+    const dl = dayLook(); const ev = evById(dl.ev);
+    html += `<div class="card"><div class="lookhead"><h3>Tu look de hoy</h3><span class="tag sky">${ev.emoji} ${esc(evName(ev))}</span></div>`;
+    if (dl.slots) {
+      html += board(dl) + `${dl.trendy ? '<div style="margin-top:10px"><span class="tag">✨ En tendencia</span></div>' : ''}
+        <div class="acts"><button class="btn btn-col" onclick="wearDay()">👗 Me lo pongo</button><button class="btn" onclick="dayLook(true);render()">🔄 Otro</button><button class="btn icon" onclick="favDay()">♡</button></div>`;
+    } else html += `<p class="muted">${esc(dl.missing || 'Añade más prendas para generar looks.')}</p><button class="btn btn-sm" onclick="openAdd()">＋ Añadir prenda</button>`;
+    html += `</div>`;
+  }
+  html += `<button class="btn btn-pri btn-big" onclick="openCreate()">¿A dónde vas? <span style="margin-left:auto">›</span></button>`;
+  // próximos
+  const up = S.looks.filter(l => l.planned && l.date >= today()).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+  if (up.length) {
+    html += `<div class="sec-t"><h2>Próximos planes</h2></div>`;
+    html += up.map(l => { const e = evById(l.ev); const d = new Date(l.date + 'T12:00:00'); const c = GROUPS[e.grp] ? GROUPS[e.grp][1] : '#F2735E';
+      return `<button class="upc" style="--c:${c}" onclick="openLook('${l.id}')"><div class="d">${d.getDate()}<small>${MESES[d.getMonth()].slice(0, 3)}</small></div><div class="grow"><b>${e.emoji} ${esc(evName(e))}</b><div class="small muted">${fmtDate(l.date)} · ${FR[l.fr || 'tarde'][0]} · look listo</div></div><span class="muted">›</span></button>`; }).join('');
+  }
+  // prenda olvidada
+  const forgot = forgottenItem();
+  if (forgot) {
+    const u = usage(forgot.id);
+    html += `<div class="forgot">${vis(forgot)}<div class="grow"><p><b>${u.last ? `Hace ${daysBetween(u.last, today())} días` : 'Aún no te has puesto'}</b> ${u.last ? 'que no te pones' : ''} tu ${esc(itemName(forgot).toLowerCase())} ${colorName(forgot.color)} 👀</p>
+      <button class="btn btn-sm" style="margin-top:8px" onclick="openCreate({useItem:'${forgot.id}'})">Hacer un look con ella</button></div></div>`;
+  }
+  html += `<div class="sec-t"><h2>Tendencias para ti</h2><button onclick="openTrendsAll()">Ver todo ›</button></div><div class="hscroll">${trendCards()}</div>`;
+  if (S.news.length) {
+    html += `<div class="sec-t"><h2>En los medios</h2></div><div class="card" style="padding:4px 14px">` + S.news.map(n =>
+      `<a class="news" href="${esc(n.url)}" target="_blank" rel="noopener">${n.image ? `<img src="${esc(n.image)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<div><b>${esc(n.title)}</b><small>${esc(n.source || '')}${n.date ? ' · ' + esc(n.date) : ''}</small></div></a>`).join('') + `</div>`;
+  }
+  return html;
+}
+function forgottenItem() {
+  const cs = currentSeason(); const t = today();
+  const cand = avail().filter(i => ['ropa','calzado','abrigos'].includes(ty(i).sec) && i.seasons.includes(cs)).filter(i => {
+    const u = usage(i.id); if (u.last) return daysBetween(u.last, t) > 60; return i.added && daysBetween(i.added.slice(0, 10), t) > 21;
+  });
+  if (!cand.length) return null; return cand[mulberry(t)() * cand.length | 0];
+}
+async function wearDay() { const dl = S.settings.dayLook; if (!dl || !dl.slots) return; await persistLook(dl, { worn: true, date: today() }); toast('¡Apuntado! A disfrutar del día ✨'); render(); }
+async function favDay() { const dl = S.settings.dayLook; if (!dl || !dl.slots) return; await persistLook(dl, { fav: true }); toast('Guardado en tus favoritos ❤️'); }
+async function persistLook(base, extra) {
+  const l = { id: uid(), slots: { ...base.slots }, items: Object.values(base.slots || {}), ev: base.ev, date: base.date || today(), fr: base.fr || 'tarde', created: Date.now(), ...extra };
+  await saveLook(l); return l;
+}
+
+/* tiempo manual */
+function weatherTap(date) {
+  S._wd = date;
+  openSheet('wx', () => {
+    const P = S.profile; const man = S.settings.manual;
+    const fr = ['manana','tarde','noche'].map(f => { const w = weatherAt(date, f); return `<div class="stat"><small>${FR[f][1]} ${FR[f][0]}</small><b style="font-size:20px">${w ? wEmoji(w.code) + ' ' + w.t + '°' : '–'}</b><small>${w ? (w.pp + '% lluvia') : 'sin datos'}</small></div>`; }).join('');
+    return `<h2 class="serif" style="margin-bottom:4px">El tiempo · ${fmtDate(date)}</h2><p class="muted small">${esc(P.cityName || P.city || 'Sin ciudad')}</p>
+      <div class="grid3" style="margin:12px 0">${fr}</div>
+      <div class="field"><label>Ciudad</label><div class="row"><input class="inp grow" id="wxcity" value="${esc(P.city || '')}" placeholder="Ej: Benidorm"><button class="btn btn-sm" onclick="setCity()">Cambiar</button></div></div>
+      <div class="field"><label>¿Prefieres decírmelo tú?</label><div class="chips wrap">${Object.entries(TC_LBL).map(([k, v]) => `<button class="chip ${man && man.date === date && man.tc === k ? 'on' : ''}" onclick="setManual('${k}')">${v[1]} ${v[0]}</button>`).join('')}
+      <button class="chip ${!(man && man.date === date) ? 'on' : ''}" style="--c:var(--sage)" onclick="setManual(null)">📡 Tiempo real</button></div></div>
+      <p class="small muted">Datos de Open-Meteo. Sin conexión uso la época del año.</p>`;
+  }, true);
+}
+async function setManual(tc) { S.settings.manual = tc ? { date: S._wd, tc } : null; S.settings.dayLook = null; await saveSettings(); closeSheet('wx', true); if (SH.find(s => s.id === 'create') && S.cl && S.cl.res) runCreate(); render(); }
+async function setCity() { const v = $('#wxcity').value.trim(); if (!v) return; S.profile.city = v; S.profile.lat = null; S.profile.cityName = null; await saveProfile(); S.fc = null; await refreshWeather(true); S.settings.dayLook = null; closeSheet('wx'); toast(S.profile.lat ? '📍 ' + (S.profile.cityName || v) : 'No encuentro esa ciudad'); }
+
+/* ---------- ARMARIO ---------- */
+function renderArmario() {
+  const a = S.arm; const secCol = (SECS.find(s => s[0] === a.sec) || [])[3];
+  return `<div class="hdr"><div><h1 style="font-size:32px">Mi armario</h1><div class="muted">${S.items.length} prendas</div></div>
+    <div class="row"><button class="icon-btn" onclick="S.arm.search=!S.arm.search;render();setTimeout(()=>{const q=$('#armq');q&&q.focus()},50)">🔍</button><button class="icon-btn" onclick="openAdd()">＋</button></div></div>
+    ${a.search ? `<input class="inp" id="armq" placeholder="Buscar prendas, colores…" value="${esc(a.q)}" oninput="S.arm.q=this.value;renderArmGrid()" style="margin-bottom:6px">` : ''}
+    <div class="tabs">${SECS.map(s => `<button class="${a.sec === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.arm.sec='${s[0]}';render()">${s[2]} ${s[1]} <span class="small">${S.items.filter(i => ty(i).sec === s[0]).length}</span></button>`).join('')}</div>
+    <div class="chips">
+      <button class="chip ${!a.season ? 'on' : ''}" style="--c:${secCol}" onclick="S.arm.season=null;render()">Todas</button>
+      ${SEASONS.map(s => `<button class="chip ${a.season === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.arm.season='${s[0]}';render()">${s[2]} ${s[1]}</button>`).join('')}
+      <button class="chip ${a.season === 'all' ? 'on' : ''}" style="--c:#9C7BD6" onclick="S.arm.season='all';render()">🔁 Todo el año</button>
+      <button class="chip ${a.fav ? 'on' : ''}" style="--c:#E8729B" onclick="S.arm.fav=!S.arm.fav;render()">❤️ Favoritas</button>
+      <button class="chip ${a.wash ? 'on' : ''}" style="--c:#2FA39A" onclick="S.arm.wash=!S.arm.wash;render()">🧺 Para lavar</button>
+    </div><div id="armgrid"></div>`;
+}
+function renderArmGrid() {
+  const a = S.arm; const q = a.q.trim().toLowerCase(); const el = $('#armgrid'); if (!el) return;
+  let list = S.items.filter(i => ty(i).sec === a.sec);
+  if (a.season === 'all') list = list.filter(i => i.seasons.length === 3); else if (a.season) list = list.filter(i => i.seasons.includes(a.season));
+  if (a.fav) list = list.filter(i => i.fav); if (a.wash) list = list.filter(i => i.state === 'lavar');
+  if (q) list = list.filter(i => (itemName(i) + ' ' + colorName(i.color) + ' ' + (i.brand || '') + ' ' + ty(i).fam).toLowerCase().includes(q));
+  if (!list.length) { el.innerHTML = `<div class="card center" style="margin-top:14px"><div style="font-size:40px">🪄</div><p class="muted">No hay prendas aquí todavía.</p><button class="btn btn-pri btn-sm" onclick="openAdd('${a.sec}')">＋ Añadir</button></div>`; return; }
+  const fams = {}; list.forEach(i => (fams[ty(i).fam] = fams[ty(i).fam] || []).push(i));
+  const order = [...new Set(T.filter(t => t[4] === a.sec).map(t => t[9]))];
+  el.innerHTML = order.filter(f => fams[f]).map((f, k) => `<div class="grp-t" style="--c:${FAM_COLORS[k % FAM_COLORS.length]}"><i></i>${f} <span>${fams[f].length}</span></div><div class="grid3">${fams[f].sort((x, y) => (y.fav ? 1 : 0) - (x.fav ? 1 : 0)).map(i => itile(i)).join('')}</div>`).join('');
+}
+
+/* ---------- AÑADIR / EDITAR PRENDA ---------- */
+function openAdd(sec, editId) {
+  const it = editId ? itemById(editId) : null;
+  S.ai = it ? { ...it, seasons: it.seasons, sec: ty(it).sec, edit: true } : { id: null, photo: null, sec: typeof sec === 'string' ? sec : (S.tab === 'armario' ? S.arm.sec : 'ropa'), type: null, color: null, color2: null, pattern: 'liso', fabric: '', seasons: '', f: null, occ: [], name: '', brand: '', fav: false, state: 'ok' };
+  openSheet('add', renderAdd);
+}
+function renderAdd() {
+  const a = S.ai;
+  const types = T.filter(t => t[4] === a.sec).map(t => TYPES[t[0]]).filter(typeAllowed);
+  const tt = a.type ? TYPES[a.type] : null;
+  return `${sheetHdr(a.edit ? 'Editar prenda' : 'Añadir prenda', 'add')}
+    <div class="photo-box">${a.photo ? `<img src="${a.photo}" alt=""><div class="chg"><button class="btn btn-sm" onclick="$('#inCam').click()">📷</button><button class="btn btn-sm" onclick="$('#inGal').click()">🖼️</button><button class="btn btn-sm" onclick="S.ai.photo=null;rs('add')">✕</button></div>`
+      : `<div class="frame"></div><div style="font-size:13px;color:#8B6A5A;position:relative;z-index:2;text-align:center;padding:0 30px">Prenda extendida o colgada sobre fondo liso</div><div class="pb"><button class="btn btn-pri btn-sm" onclick="$('#inCam').click()">📷 Cámara</button><button class="btn btn-sm" onclick="$('#inGal').click()">🖼️ Galería</button></div>`}
+    </div>
+    <input type="file" id="inCam" accept="image/*" capture="environment" hidden onchange="pickPhoto(this,'ai')"><input type="file" id="inGal" accept="image/*" hidden onchange="pickPhoto(this,'ai')">
+    <div class="field"><label>1 · ¿Qué es?</label>
+      <div class="chips">${SECS.map(s => `<button class="chip ${a.sec === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.ai.sec='${s[0]}';S.ai.type=null;rs('add')">${s[2]} ${s[1]}</button>`).join('')}</div>
+      <div class="tgrid" style="margin-top:10px">${types.map(t => `<button class="tchip ${a.type === t.id ? 'on' : ''}" onclick="pickType('${t.id}')"><span class="e">${t.emoji}</span>${t.name}</button>`).join('')}</div></div>
+    <div class="field"><label>2 · Color ${a.color ? `<span class="muted" style="font-weight:400">· ${COL[a.color].name}</span>` : ''}</label>${colorGrid(a.color, "pickColor")}</div>
+    <div class="field"><label>3 · ¿Cuándo te la pones?</label><div class="chips wrap">${SEASONS.map(s => `<button class="chip ${a.seasons.includes(s[0]) ? 'on' : ''}" style="--c:${s[3]}" onclick="togSeason('${s[0]}')">${s[2]} ${s[1]}</button>`).join('')}</div>
+      ${tt ? `<p class="small muted" style="margin-top:6px">Sugerido para «${tt.name}». Puedes cambiarlo.</p>` : ''}</div>
+    <details class="more" ${a.edit ? 'open' : ''}><summary>➕ Más detalles (opcional)</summary>
+      <div class="field"><label>Nombre propio</label><input class="inp" placeholder="${tt ? esc(tt.name) : 'Ej: Jersey de la abuela'}" value="${esc(a.name)}" oninput="S.ai.name=this.value"></div>
+      <div class="field"><label>Estampado</label><div class="chips wrap">${PATTERNS.map(p => `<button class="chip ${a.pattern === p[0] ? 'on' : ''}" onclick="S.ai.pattern='${p[0]}';rs('add')">${p[1]}</button>`).join('')}</div></div>
+      <div class="field"><label>Tejido</label><div class="chips wrap">${FABRICS.map(p => `<button class="chip ${a.fabric === p[0] ? 'on' : ''}" style="--c:#B98552" onclick="S.ai.fabric=S.ai.fabric==='${p[0]}'?'':'${p[0]}';rs('add')">${p[1]}</button>`).join('')}</div></div>
+      <div class="field"><label>Color secundario</label>${colorGrid(a.color2, "pickColor2")}</div>
+      <div class="field"><label>Formalidad: ${a.f || (tt ? tt.f : 3)}</label><input type="range" min="1" max="5" value="${a.f || (tt ? tt.f : 3)}" oninput="S.ai.f=+this.value;this.previousElementSibling.textContent='Formalidad: '+this.value"><div class="seg"><span>Deporte</span><span>Casual</span><span>Arreglado</span><span>Elegante</span><span>Etiqueta</span></div></div>
+      <div class="field"><label>Ocasiones</label><div class="chips wrap">${OCC.map(o => `<button class="chip ${a.occ.includes(o[0]) ? 'on' : ''}" style="--c:${GROUPS[o[0]][1]}" onclick="togOcc('${o[0]}')">${o[1]}</button>`).join('')}</div></div>
+      <div class="field"><label>Marca</label><input class="inp" value="${esc(a.brand)}" oninput="S.ai.brand=this.value" placeholder="Ej: Mango"></div>
+      ${a.edit ? `<div class="field"><label>Estado</label><div class="chips wrap">${[['ok','✅ Disponible'],['lavar','🧺 Para lavar'],['prestada','🤝 Prestada'],['arreglar','🪡 Para arreglar']].map(s => `<button class="chip ${(a.state || 'ok') === s[0] ? 'on' : ''}" onclick="S.ai.state='${s[0]}';rs('add')">${s[1]}</button>`).join('')}</div></div>` : ''}
+    </details>
+    <button class="btn btn-pri btn-big" onclick="saveAdd(false)">${a.edit ? 'Guardar cambios' : 'Guardar'}</button>
+    ${a.edit ? `<button class="btn btn-big btn-danger" style="margin-top:10px" onclick="removeItem('${a.id}')">Eliminar prenda</button>` : `<button class="btn btn-big" style="margin-top:10px" onclick="saveAdd(true)">Guardar y añadir otra</button>`}`;
+}
+function colorGrid(sel, fn) {
+  return `<div class="ccgrid">${COLORS.map(c => `<button class="cc ${sel === c[0] ? 'on' : ''}" onclick="${fn}('${c[0]}')"><i style="background:${c[2] === 'multi' ? 'conic-gradient(#F2735E,#E9B23F,#5FA36B,#5B8DEF,#9C7BD6,#F2735E)' : c[2]}"></i>${c[1]}</button>`).join('')}</div>`;
+}
+function pickType(id) { const t = TYPES[id]; S.ai.type = id; if (!S.ai.edit || !S.ai.seasons) S.ai.seasons = t.seasons; S.ai.f = null; rs('add'); }
+function pickColor(c) { S.ai.color = c; rs('add'); }
+function pickColor2(c) { S.ai.color2 = S.ai.color2 === c ? null : c; rs('add'); }
+function togSeason(s) { const a = S.ai; a.seasons = a.seasons.includes(s) ? a.seasons.replace(s, '') : 'pvo'.split('').filter(x => a.seasons.includes(x) || x === s).join(''); rs('add'); }
+function togOcc(o) { const a = S.ai; a.occ = a.occ.includes(o) ? a.occ.filter(x => x !== o) : a.occ.concat(o); rs('add'); }
+async function saveAdd(another) {
+  const a = S.ai;
+  if (!a.type) return toast('Elige qué prenda es 👆');
+  if (!a.color) return toast('Elige un color 🎨');
+  if (!a.seasons) return toast('Marca al menos una estación');
+  const t = TYPES[a.type];
+  const item = { id: a.id || uid(), type: a.type, name: a.name.trim(), color: a.color, color2: a.color2, pattern: a.pattern, fabric: a.fabric, seasons: a.seasons, f: a.f || t.f, occ: a.occ, brand: a.brand.trim(), fav: a.fav, state: a.state || 'ok', photo: a.photo, added: a.added || new Date().toISOString() };
+  await saveItem(item); S.settings.dayLook = null;
+  if (another) { const sec = a.sec; toast('Guardada ✓ Siguiente'); S.ai = { id: null, photo: null, sec, type: null, color: null, color2: null, pattern: 'liso', fabric: '', seasons: '', f: null, occ: [], name: '', brand: '', fav: false, state: 'ok' }; rs('add'); window.scrollTo(0, 0); SH.find(s => s.id === 'add').el.scrollTop = 0; }
+  else { closeSheet('add', true); if (SH.find(s => s.id === 'item')) rs('item'); toast(a.edit ? 'Cambios guardados' : 'Prenda guardada ✓'); render(); }
+}
+function compress(file, max = 900) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader(); fr.onerror = rej;
+    fr.onload = () => { const img = new Image(); img.onerror = rej; img.onload = () => {
+      const sc = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas');
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      res(c.toDataURL('image/jpeg', 0.78)); }; img.src = fr.result; };
+    fr.readAsDataURL(file);
+  });
+}
+async function pickPhoto(input, target) {
+  const f = input.files && input.files[0]; if (!f) return;
+  try { const d = await compress(f, target === 'pl' ? 1100 : 900); if (target === 'ai') { S.ai.photo = d; rs('add'); } else { S.pl.photo = d; rs('pl'); } }
+  catch (e) { toast('No he podido leer la foto'); }
+}
+async function removeItem(id) { if (!confirm('¿Eliminar esta prenda?')) return; await delItem(id); S.settings.dayLook = null; SH.slice().forEach(s => { if (['add','item'].includes(s.id)) closeSheet(s.id, true); }); toast('Prenda eliminada'); render(); }
+
+/* ---------- FICHA DE PRENDA ---------- */
+function openItem(id) { S.itemId = id; openSheet('item', renderItem); }
+function renderItem() {
+  const i = itemById(S.itemId); if (!i) return sheetHdr('Prenda', 'item');
+  const t = ty(i); const u = usage(i.id); const looks = S.looks.filter(l => lookIds(l).includes(i.id)).slice(-6).reverse();
+  const tr = TRENDS.filter(x => trendVisible(x) && x.m(i));
+  return `${sheetHdr(esc(itemName(i)), 'item', `<button class="icon-btn" onclick="togFav('${i.id}')">${i.fav ? '❤️' : '♡'}</button>`)}
+    <div style="max-width:320px;margin:0 auto">${vis(i)}</div>
+    <div class="chips wrap" style="margin-top:14px;justify-content:center">
+      <span class="chip">${t.emoji} ${t.name}</span><span class="chip" style="display:inline-flex;gap:6px;align-items:center"><i style="width:14px;height:14px;border-radius:50%;display:inline-block;background:${COL[i.color].hex === 'multi' ? 'conic-gradient(#F2735E,#E9B23F,#5FA36B,#5B8DEF)' : COL[i.color].hex};box-shadow:0 0 0 1px #ddd"></i>${COL[i.color].name}</span>
+      ${SEASONS.filter(s => i.seasons.includes(s[0])).map(s => `<span class="chip on" style="--c:${s[3]}">${s[2]} ${s[1]}</span>`).join('')}
+      ${i.pattern && i.pattern !== 'liso' ? `<span class="chip">${PATTERNS.find(p => p[0] === i.pattern)[1]}</span>` : ''}
+      ${i.fabric ? `<span class="chip">${FABRICS.find(p => p[0] === i.fabric)[1]}</span>` : ''}
+      ${i.brand ? `<span class="chip">🏷️ ${esc(i.brand)}</span>` : ''}
+      ${tr.map(x => `<span class="tag">✨ ${x.t}</span>`).join('')}
+    </div>
+    <div class="grid3" style="margin:16px 0">
+      <div class="stat" style="--c:var(--coral)"><b>${u.n}</b><small>veces usada</small></div>
+      <div class="stat" style="--c:var(--sky)"><b style="font-size:16px;padding:6px 0">${u.last ? fmtDate(u.last) : '—'}</b><small>última vez</small></div>
+      <div class="stat" style="--c:var(--sage)"><b>${i.f}</b><small>formalidad</small></div>
+    </div>
+    <div class="chips wrap" style="margin-bottom:14px">${[['ok','✅ Disponible'],['lavar','🧺 Para lavar'],['prestada','🤝 Prestada'],['arreglar','🪡 Arreglar']].map(s => `<button class="chip ${(i.state || 'ok') === s[0] ? 'on' : ''}" style="--c:var(--teal)" onclick="setState('${i.id}','${s[0]}')">${s[1]}</button>`).join('')}</div>
+    <button class="btn btn-col btn-big" onclick="closeSheet('item',true);openCreate({useItem:'${i.id}'})">✨ Hacer un look con esta prenda</button>
+    <button class="btn btn-big" style="margin-top:10px" onclick="openAdd(null,'${i.id}')">✏️ Editar</button>
+    ${looks.length ? `<div class="sec-t"><h2>Looks con esta prenda</h2></div><div class="grid2">${looks.map(lookCard).join('')}</div>` : ''}`;
+}
+async function togFav(id) { const i = itemById(id); i.fav = !i.fav; await saveItem(i); rs('item'); }
+async function setState(id, s) { const i = itemById(id); i.state = s; await saveItem(i); S.settings.dayLook = null; rs('item'); }
+
+/* ---------- CREAR LOOK ---------- */
+function openCreate(opts = {}) {
+  S.cl = { ev: null, when: 'hoy', date: today(), fr: new Date().getHours() >= 18 ? 'noche' : 'tarde', opts: { ...opts }, all: false, res: null, idx: 0 };
+  openSheet('create', renderCreate);
+}
+function favEvents() {
+  const cnt = {}; S.looks.forEach(l => { cnt[l.ev] = (cnt[l.ev] || 0) + 1; });
+  const job = S.profile.job; const workEv = { formal: 'of_formal', casual: 'of_casual', tele: 'tele', uniforme: 'uniforme', fisico: 'uniforme' }[job];
+  const def = [workEv, 'cena', 'gym', 'amigas', 'fiesta', 'playa', 'casual', 'boda_dia', 'viaje', 'cita', 'compras'].filter(Boolean);
+  const ids = [...new Set(Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).concat(def))].filter(id => allEvents().some(e => e.id === id));
+  return ids.slice(0, 8).map(evById);
+}
+const evTile = e => { const c = e.color || (GROUPS[e.grp] || GROUPS.custom)[1]; return `<button class="ev ${S.cl.ev === e.id ? 'on' : ''}" style="--c:${c}" onclick="S.cl.ev='${e.id}';rs('create')"><div class="e">${e.emoji}</div><span>${esc(evName(e))}</span></button>`; };
+function renderCreate() {
+  const c = S.cl;
+  if (c.res) return renderResult();
+  const fav = favEvents();
+  let evs = '';
+  if (!c.all) evs = `<div class="evgrid">${fav.map(evTile).join('')}<button class="ev" style="--c:#9C7BD6" onclick="S.cl.all=true;rs('create')"><div class="e">➕</div><span>Ver todos</span></button></div>`;
+  else {
+    const byG = {}; allEvents().forEach(e => (byG[e.grp] = byG[e.grp] || []).push(e));
+    evs = Object.keys(GROUPS).filter(g => byG[g]).map(g => `<div class="evgrp" style="color:${GROUPS[g][1]}">${GROUPS[g][0]}</div><div class="evgrid">${byG[g].map(evTile).join('')}</div>`).join('')
+      + `<button class="btn btn-sm" style="margin-top:14px" onclick="openCustomEv()">＋ Crear evento personalizado</button>`;
+  }
+  const forced = c.opts.useItem ? itemById(c.opts.useItem) : null;
+  return `${sheetHdr('', 'create')}
+    <h1 class="h-title">¿A dónde vas?</h1><p class="h-sub">Elige el plan y te preparo el conjunto perfecto</p>
+    ${evs}
+    <div class="field" style="margin-top:22px"><label>¿Cuándo?</label>
+      <div class="chips">
+        <button class="chip ${c.when === 'hoy' ? 'on' : ''}" onclick="setWhen('hoy')">📅 Hoy</button>
+        <button class="chip ${c.when === 'man' ? 'on' : ''}" onclick="setWhen('man')">Mañana</button>
+        <button class="chip ${c.when === 'otro' ? 'on' : ''}" onclick="setWhen('otro')">🗓️ ${c.when === 'otro' ? fmtDate(c.date) : 'Elegir fecha'}</button>
+      </div>
+      ${c.when === 'otro' ? `<input type="date" class="inp" style="margin-top:8px" value="${c.date}" min="${today()}" onchange="S.cl.date=this.value||today();rs('create')">` : ''}
+      <div class="chips" style="margin-top:8px">${Object.entries(FR).map(([k, v]) => `<button class="chip ${c.fr === k ? 'on' : ''}" style="--c:#5B8DEF" onclick="S.cl.fr='${k}';rs('create')">${v[1]} ${v[0]}</button>`).join('')}</div>
+    </div>
+    <div class="field"><label>¿Algo más? <span class="muted" style="font-weight:400">(opcional)</span></label>
+      <div class="chips wrap">
+        <button class="chip ${c.opts.comoda ? 'on' : ''}" style="--c:#5FA36B" onclick="togOpt('comoda')">🧸 Ir cómoda</button>
+        <button class="chip ${c.opts.arreglada ? 'on' : ''}" style="--c:#E8729B" onclick="togOpt('arreglada')">💄 Muy arreglada</button>
+        <button class="chip ${c.opts.sinTacones ? 'on' : ''}" style="--c:#F29A2E" onclick="togOpt('sinTacones')">🥿 Sin tacones</button>
+        <button class="chip ${forced ? 'on' : ''}" style="--c:#9C7BD6" onclick="${forced ? "S.cl.opts.useItem=null;rs('create')" : 'pickForced()'}">${forced ? '✕ ' + esc(itemName(forced)) : '👚 Usar una prenda'}</button>
+      </div></div>
+    <button class="btn btn-pri btn-big" style="margin-top:8px" onclick="runCreate()">✨ Crear looks</button>`;
+}
+function setWhen(w) { const c = S.cl; c.when = w; c.date = w === 'hoy' ? today() : w === 'man' ? addDays(today(), 1) : (c.date > today() ? c.date : addDays(today(), 2)); rs('create'); }
+function togOpt(k) { S.cl.opts[k] = !S.cl.opts[k]; if (k === 'comoda' && S.cl.opts.comoda) S.cl.opts.arreglada = false; if (k === 'arreglada' && S.cl.opts.arreglada) S.cl.opts.comoda = false; rs('create'); }
+function pickForced() {
+  openSheet('pick', () => {
+    const list = S.items.filter(i => ['top','bottom','full','swim','shoes'].includes(ty(i).slot));
+    return `<h2 class="serif" style="margin-bottom:12px">¿Qué prenda quieres llevar?</h2>${list.length ? `<div class="grid3">${list.map(i => itile(i, { onclick: `S.cl.opts.useItem='${i.id}';closeSheet('pick',true);rs('create')` })).join('')}</div>` : '<p class="muted">Aún no tienes prendas.</p>'}`;
+  }, true);
+}
+function runCreate() {
+  const c = S.cl; if (!c.ev) return toast('Elige primero a dónde vas 👆');
+  if (!S.items.length) return toast('Añade prendas a tu armario primero');
+  const ctx = buildCtx(c.date, c.fr, c.opts); const r = generate(evById(c.ev), ctx, 3);
+  c.ctx = ctx; c.res = r; c.idx = 0; rs('create'); const s = SH.find(x => x.id === 'create'); if (s) s.el.scrollTop = 0;
+  if (!S.fc) refreshWeather().then(() => { if (S.fc && S.cl && S.cl.res && !S.cl.ctx.w) runCreate(); });
+}
+function renderResult() {
+  const c = S.cl; const ev = evById(c.ev); const ctx = c.ctx;
+  const head = `<div class="sh-hdr"><button class="icon-btn" onclick="S.cl.res=null;rs('create')">‹</button><h2 style="font-size:18px">${ev.emoji} ${esc(evName(ev))}</h2><button class="chip" onclick="weatherTap('${c.date}')">${ctxLabel(ctx)}</button></div>
+    <p class="center small muted" style="margin:-4px 0 10px">${fmtDate(c.date)} · ${FR[c.fr][1]} ${FR[c.fr][0]}${ctx.rain ? ' · ☔ llévate algo para la lluvia' : ''}</p>`;
+  if (!c.res.looks.length) return head + `<div class="card center"><div style="font-size:44px">🤷‍♀️</div><p>${esc(c.res.missing)}</p><button class="btn btn-pri" onclick="closeSheet('create',true);openAdd()">＋ Añadir prendas</button></div>`;
+  const slides = c.res.looks.map((l, k) => `<div class="slide"><div class="card" style="padding:12px">
+      <div class="lookhead"><h3>Opción ${k + 1}</h3>${l.trendy ? '<span class="tag">✨ En tendencia</span>' : ''}</div>
+      ${board(l, 'res', k)}<p class="center small muted" style="margin:8px 0 0">Toca una prenda para cambiarla</p>
+      <div class="acts"><button class="btn btn-col" onclick="wearRes(${k})">👗 Me lo pongo</button><button class="btn" onclick="favRes(${k})">♡ Guardar</button><button class="btn icon" onclick="planRes(${k})" title="Al calendario">🗓️</button></div>
+    </div></div>`).join('');
+  setTimeout(() => { const car = $('#car'); if (car) { car.scrollLeft = c.idx * car.clientWidth; car.onscroll = () => { const i = Math.round(car.scrollLeft / (car.clientWidth - 8)); if (i !== S.cl.idx) { S.cl.idx = i; document.querySelectorAll('#dots i').forEach((d, j) => d.classList.toggle('on', j === i)); } }; } }, 0);
+  return head + `<div class="carousel" id="car">${slides}</div><div class="dots" id="dots">${c.res.looks.map((_, k) => `<i class="${k === c.idx ? 'on' : ''}"></i>`).join('')}</div>
+    <button class="btn btn-big" style="margin-top:8px" onclick="runCreate()">🔄 Otra tanda de looks</button>`;
+}
+function slotCandidates(slot, look) {
+  const pool = avail(); const ev = evById(S.cl ? S.cl.ev : look.ev);
+  let l = pool.filter(i => ty(i).slot === slot);
+  if (slot === 'top' || slot === 'bottom' || slot === 'outer' || slot === 'shoes') l = l.filter(i => (ev.fl.includes('sport')) === (ty(i).sec === 'deporte') || ev.fl.includes('sport'));
+  return l;
+}
+function swapSlot(li, slot) {
+  S._sw = { li, slot };
+  openSheet('swap', () => {
+    const look = S.cl.res.looks[li]; const cur = look.slots[slot];
+    const list = slotCandidates(slot, look);
+    const optional = !['top','bottom','full','swim'].includes(slot);
+    return `<h2 class="serif" style="margin-bottom:4px">Cambiar prenda</h2><p class="muted small" style="margin-bottom:12px">Elige otra de tu armario</p>
+      ${optional && cur ? `<button class="btn btn-sm" style="margin-bottom:12px" onclick="doSwap(null)">✕ Quitar del look</button>` : ''}
+      <div class="grid3">${list.map(i => itile(i, { sel: i.id === cur, onclick: `doSwap('${i.id}')` })).join('')}</div>`;
+  }, true);
+}
+function doSwap(id) { const { li, slot } = S._sw; const l = S.cl.res.looks[li]; if (id) l.slots[slot] = id; else delete l.slots[slot]; l.trendy = Object.values(l.slots).some(x => { const it = itemById(x); return it && isTrendy(it); }); S.cl.idx = li; closeSheet('swap', true); rs('create'); }
+async function wearRes(k) {
+  const c = S.cl; const l = c.res.looks[k]; const future = c.date > today();
+  await persistLook(l, future ? { planned: true } : { worn: true, date: c.date });
+  toast(future ? `Apuntado para el ${fmtDate(c.date)} 🗓️` : '¡Apuntado! A disfrutar ✨'); closeSheet('create');
+}
+async function favRes(k) { await persistLook(S.cl.res.looks[k], { fav: true }); toast('Guardado en favoritos ❤️'); }
+async function planRes(k) { await persistLook(S.cl.res.looks[k], { planned: true }); toast(`En tu calendario · ${fmtDate(S.cl.date)} 🗓️`); }
+
+function openCustomEv() {
+  S._ce = { name: '', emoji: '⭐', f: 3, out: 2 };
+  openSheet('cev', () => { const e = S._ce; return `<h2 class="serif" style="margin-bottom:12px">Nuevo evento</h2>
+    <div class="field"><label>Nombre</label><input class="inp" value="${esc(e.name)}" oninput="S._ce.name=this.value" placeholder="Ej: Clase de baile"></div>
+    <div class="field"><label>Icono</label><div class="chips wrap">${['⭐','💃','🎨','🍽️','🎤','🐶','⛪','🎳','🧁','🏛️','🎮','🚤'].map(x => `<button class="chip ${e.emoji === x ? 'on' : ''}" onclick="S._ce.emoji='${x}';rs('cev')">${x}</button>`).join('')}</div></div>
+    <div class="field"><label>Formalidad</label><div class="chips wrap">${[[1,'Deporte'],[2,'Casual'],[3,'Arreglado'],[4,'Elegante'],[5,'Etiqueta']].map(x => `<button class="chip ${e.f === x[0] ? 'on' : ''}" onclick="S._ce.f=${x[0]};rs('cev')">${x[1]}</button>`).join('')}</div></div>
+    <div class="field"><label>¿Dónde?</label><div class="chips wrap">${[[0,'🏠 Dentro'],[1,'🌳 Fuera'],[2,'↔️ Las dos']].map(x => `<button class="chip ${e.out === x[0] ? 'on' : ''}" onclick="S._ce.out=${x[0]};rs('cev')">${x[1]}</button>`).join('')}</div></div>
+    <button class="btn btn-pri btn-big" onclick="saveCustomEv()">Crear evento</button>`; }, true);
+}
+async function saveCustomEv() {
+  const e = S._ce; if (!e.name.trim()) return toast('Ponle un nombre');
+  const ev = { id: 'c_' + uid(), name: e.name.trim(), emoji: e.emoji, grp: 'custom', fmin: e.f, fmax: e.f, out: e.out, fl: e.f === 1 ? ['sport'] : [] };
+  S.settings.custom = (S.settings.custom || []).concat(ev); await saveSettings(); S.cl.ev = ev.id; closeSheet('cev', true); rs('create');
+}
+
+/* ---------- LOOKS ---------- */
+function lookCard(l) {
+  const e = evById(l.ev);
+  const top = l.photo ? `<img class="ph" src="${l.photo}" alt="">` : board(l, 'mini');
+  return `<div class="lcard" onclick="openLook('${l.id}')">${top}<div class="lt">${e.emoji} ${esc(evName(e))}</div><div class="ld">${fmtDate(l.date)}${l.worn ? ' · puesto' : l.planned ? ' · planificado' : ''}${l.fav ? ' · ❤️' : ''}</div></div>`;
+}
+function renderLooks() {
+  const k = S.lk;
+  let html = `<div class="hdr"><div><h1 style="font-size:32px">Mis looks</h1><div class="muted">${S.looks.length} guardados</div></div><button class="btn btn-col btn-sm" onclick="openPhotoLook()">📸 Foto de mi look</button></div>
+    <div class="tabs">${[['fav','❤️ Favoritos'],['cal','🗓️ Calendario'],['all','📚 Todos'],['build','🧩 Montar a mano']].map(t => `<button class="${k.tab === t[0] ? 'on' : ''}" onclick="S.lk.tab='${t[0]}';render()">${t[1]}</button>`).join('')}</div>`;
+  if (k.tab === 'fav' || k.tab === 'all') {
+    let list = S.looks.slice().sort((a, b) => b.created - a.created); if (k.tab === 'fav') list = list.filter(l => l.fav);
+    const gs = [...new Set(list.map(l => evById(l.ev).grp))];
+    if (gs.length > 1) html += `<div class="chips" style="margin-bottom:12px"><button class="chip ${k.grp === 'all' ? 'on' : ''}" onclick="S.lk.grp='all';render()">Todos</button>${gs.map(g => `<button class="chip ${k.grp === g ? 'on' : ''}" style="--c:${GROUPS[g][1]}" onclick="S.lk.grp='${g}';render()">${GROUPS[g][0]}</button>`).join('')}</div>`;
+    if (k.grp !== 'all') list = list.filter(l => evById(l.ev).grp === k.grp);
+    html += list.length ? `<div class="grid2">${list.map(lookCard).join('')}</div>` : `<div class="card center"><div style="font-size:42px">💫</div><p class="muted">${k.tab === 'fav' ? 'Cuando un look te guste, pulsa ♡ Guardar y aparecerá aquí.' : 'Aún no hay looks.'}</p><button class="btn btn-pri btn-sm" onclick="openCreate()">Crear un look</button></div>`;
+  } else if (k.tab === 'cal') html += renderCal();
+  else html += `<div class="card center"><div style="font-size:42px">🧩</div><p>Monta tú misma un conjunto eligiendo prenda por prenda.</p><button class="btn btn-pri" onclick="openBuild()">Empezar</button></div>`;
+  return html;
+}
+function renderCal() {
+  const [y, m] = S.lk.month.split('-').map(Number); const first = new Date(y, m - 1, 1); const days = new Date(y, m, 0).getDate();
+  const off = (first.getDay() + 6) % 7; const t = today();
+  let cells = ['L','M','X','J','V','S','D'].map(d => `<div class="wd">${d}</div>`).join('');
+  for (let i = 0; i < off; i++) cells += '<div class="d out"></div>';
+  for (let d = 1; d <= days; d++) {
+    const date = `${y}-${z2(m)}-${z2(d)}`; const ls = S.looks.filter(l => l.date === date && (l.worn || l.planned));
+    const worn = ls.find(l => l.worn); const plan = ls.find(l => l.planned);
+    let th = '';
+    if (worn) { if (worn.photo) th = `<div class="th"><img src="${worn.photo}" style="width:100%;height:100%;object-fit:cover"></div>`; else { const it = itemById(worn.slots.full || worn.slots.top || worn.slots.swim || worn.items[0]); th = `<div class="th">${vis(it)}</div>`; } }
+    cells += `<button class="d ${date === t ? 'today' : ''}" onclick="openDay('${date}')">${d}${th}${plan && !worn ? '<span class="dot"></span>' : ''}</button>`;
+  }
+  return `<div class="row" style="justify-content:space-between;margin-bottom:10px"><button class="icon-btn" onclick="calMove(-1)">‹</button><h2 style="font-size:20px;text-transform:capitalize">${MESES[m - 1]} ${y}</h2><button class="icon-btn" onclick="calMove(1)">›</button></div>
+    <div class="cal">${cells}</div><p class="small muted center" style="margin-top:10px">Miniatura = lo que te pusiste · <span style="color:var(--coral)">●</span> = plan con look preparado</p>`;
+}
+function calMove(n) { const [y, m] = S.lk.month.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); S.lk.month = d.getFullYear() + '-' + z2(d.getMonth() + 1); render(); }
+function openDay(date) {
+  const ls = S.looks.filter(l => l.date === date && (l.worn || l.planned));
+  openSheet('day', () => `<h2 class="serif" style="margin-bottom:12px">${fmtDate(date)}</h2>${ls.length ? `<div class="grid2">${ls.map(lookCard).join('')}</div>` : '<p class="muted">Nada apuntado este día.</p>'}
+    <div class="row" style="margin-top:14px"><button class="btn grow" onclick="closeSheet('day',true);openPhotoLook('${date}')">📸 Subir foto</button>${date >= today() ? `<button class="btn btn-pri grow" onclick="closeSheet('day',true);openCreate();S.cl.when='otro';S.cl.date='${date}';rs('create')">✨ Planear look</button>` : ''}</div>`, true);
+}
+function openLook(id) {
+  S._lid = id;
+  openSheet('look', () => {
+    const l = S.looks.find(x => x.id === S._lid); if (!l) return sheetHdr('Look', 'look');
+    const e = evById(l.ev); const items = lookIds(l).map(itemById).filter(Boolean);
+    return `${sheetHdr(`${e.emoji} ${esc(evName(e))}`, 'look', `<button class="icon-btn" onclick="togLookFav('${l.id}')">${l.fav ? '❤️' : '♡'}</button>`)}
+      <p class="center muted small" style="margin-top:-6px">${fmtDate(l.date)} · ${l.worn ? 'Puesto' : l.planned ? 'Planificado' : 'Guardado'}</p>
+      ${l.photo ? `<img src="${l.photo}" style="width:100%;border-radius:20px;margin:10px 0;display:block">` : ''}
+      ${Object.keys(l.slots || {}).length ? board(l) : ''}
+      ${l.photo && items.length ? `<div class="sec-t"><h2>Llevabas</h2></div><div class="grid3">${items.map(i => itile(i)).join('')}</div>` : ''}
+      <div class="acts" style="margin-top:16px"><button class="btn btn-col" onclick="wearAgain('${l.id}')">👗 Me lo pongo hoy</button>${l.planned && !l.worn ? `<button class="btn" onclick="markWorn('${l.id}')">✓ Ya me lo puse</button>` : ''}</div>
+      <button class="btn btn-big btn-danger" style="margin-top:10px" onclick="removeLook('${l.id}')">Eliminar</button>`;
+  });
+}
+async function togLookFav(id) { const l = S.looks.find(x => x.id === id); l.fav = !l.fav; await saveLook(l); rs('look'); }
+async function wearAgain(id) { const l = S.looks.find(x => x.id === id); await persistLook(l, { worn: true, date: today(), photo: null, items: l.items }); toast('¡Apuntado para hoy! ✨'); closeSheet('look'); }
+async function markWorn(id) { const l = S.looks.find(x => x.id === id); l.worn = true; l.planned = false; await saveLook(l); toast('Marcado como puesto ✓'); rs('look'); }
+async function removeLook(id) { if (!confirm('¿Eliminar este look?')) return; await delLook(id); closeSheet('look'); }
+
+/* foto de mi look */
+function openPhotoLook(date) {
+  S.pl = { photo: null, items: [], ev: dayEventId(), date: date || today(), sec: 'ropa' };
+  openSheet('pl', () => {
+    const p = S.pl; const list = S.items.filter(i => ty(i).sec === p.sec);
+    return `${sheetHdr('Foto de mi look', 'pl')}
+      <div class="photo-box" style="aspect-ratio:3/4">${p.photo ? `<img src="${p.photo}" style="object-fit:cover"><div class="chg"><button class="btn btn-sm" onclick="$('#plCam').click()">📷</button><button class="btn btn-sm" onclick="$('#plGal').click()">🖼️</button></div>`
+        : `<div style="font-size:46px;position:relative;z-index:2">🤳</div><div class="pb"><button class="btn btn-pri btn-sm" onclick="$('#plCam').click()">📷 Cámara</button><button class="btn btn-sm" onclick="$('#plGal').click()">🖼️ Galería</button></div>`}</div>
+      <input type="file" id="plCam" accept="image/*" capture="user" hidden onchange="pickPhoto(this,'pl')"><input type="file" id="plGal" accept="image/*" hidden onchange="pickPhoto(this,'pl')">
+      <div class="field"><label>Plan</label><select class="inp" onchange="S.pl.ev=this.value">${Object.keys(GROUPS).map(g => { const evs = allEvents().filter(e => e.grp === g); return evs.length ? `<optgroup label="${GROUPS[g][0]}">${evs.map(e => `<option value="${e.id}" ${p.ev === e.id ? 'selected' : ''}>${e.emoji} ${esc(evName(e))}</option>`).join('')}</optgroup>` : ''; }).join('')}</select></div>
+      <div class="field"><label>Fecha</label><input type="date" class="inp" value="${p.date}" onchange="S.pl.date=this.value||today()"></div>
+      <div class="field"><label>¿Qué llevas puesto? <span class="muted" style="font-weight:400">(${p.items.length} marcadas)</span></label>
+        <div class="chips" style="margin-bottom:10px">${SECS.map(s => `<button class="chip ${p.sec === s[0] ? 'on' : ''}" style="--c:${s[3]}" onclick="S.pl.sec='${s[0]}';rs('pl')">${s[2]} ${s[1]}</button>`).join('')}</div>
+        ${list.length ? `<div class="grid3">${list.map(i => itile(i, { sel: p.items.includes(i.id), onclick: `togPl('${i.id}')` })).join('')}</div>` : '<p class="muted small">No hay prendas en esta sección.</p>'}</div>
+      <button class="btn btn-pri btn-big" onclick="savePl()">Guardar look</button>`;
+  });
+}
+function togPl(id) { const p = S.pl; p.items = p.items.includes(id) ? p.items.filter(x => x !== id) : p.items.concat(id); rs('pl'); }
+async function savePl() {
+  const p = S.pl; if (!p.photo && !p.items.length) return toast('Añade una foto o marca alguna prenda');
+  const slots = {}; p.items.forEach(id => { const it = itemById(id); if (it && !slots[ty(it).slot]) slots[ty(it).slot] = id; });
+  const l = { id: uid(), slots, items: p.items.slice(), ev: p.ev, date: p.date, fr: 'tarde', photo: p.photo, worn: p.date <= today(), planned: p.date > today(), fav: false, created: Date.now() };
+  await saveLook(l); toast('Look guardado 📸'); closeSheet('pl');
+}
+
+/* montar a mano */
+function openBuild() {
+  S.bd = { mode: 'pair', slots: {}, ev: 'casual' };
+  openSheet('build', () => {
+    const b = S.bd;
+    return `${sheetHdr('Montar look', 'build')}
+      <div class="chips" style="margin-bottom:12px">${[['pair','👚 Arriba + abajo'],['full','👗 Vestido / mono'],['swim','👙 Baño']].map(m => `<button class="chip ${b.mode === m[0] ? 'on' : ''}" onclick="S.bd.mode='${m[0]}';rs('build')">${m[1]}</button>`).join('')}</div>
+      ${board({ slots: b.slots, mode: b.mode }, 'build')}
+      <p class="small muted center" style="margin:8px 0">Toca cada hueco para elegir prenda. Los huecos vacíos no se guardan.</p>
+      <div class="field"><label>Plan</label><select class="inp" onchange="S.bd.ev=this.value">${allEvents().map(e => `<option value="${e.id}" ${b.ev === e.id ? 'selected' : ''}>${e.emoji} ${esc(evName(e))}</option>`).join('')}</select></div>
+      <div class="acts"><button class="btn btn-col" onclick="saveBuild(true)">👗 Me lo pongo hoy</button><button class="btn" onclick="saveBuild(false)">♡ Guardar</button></div>`;
+  });
+}
+function buildPick(slot) {
+  S._bs = slot;
+  openSheet('bpick', () => {
+    const list = S.items.filter(i => ty(i).slot === S._bs); const cur = S.bd.slots[S._bs];
+    return `<h2 class="serif" style="margin-bottom:12px">Elige prenda</h2>${cur ? `<button class="btn btn-sm" style="margin-bottom:12px" onclick="S.bd.slots['${slot}']=undefined;delete S.bd.slots['${slot}'];closeSheet('bpick',true);rs('build')">✕ Quitar</button>` : ''}
+      ${list.length ? `<div class="grid3">${list.map(i => itile(i, { sel: i.id === cur, onclick: `S.bd.slots['${slot}']='${i.id}';closeSheet('bpick',true);rs('build')` })).join('')}</div>` : '<p class="muted">No tienes prendas para este hueco todavía.</p>'}`;
+  }, true);
+}
+async function saveBuild(wear) {
+  const b = S.bd; const keep = b.mode === 'full' ? ['full'] : b.mode === 'swim' ? ['swim','cover'] : ['top','bottom'];
+  const slots = {}; Object.entries(b.slots).forEach(([k, v]) => { if (v && (!['top','bottom','full','swim','cover'].includes(k) || keep.includes(k))) slots[k] = v; });
+  if (!Object.keys(slots).length) return toast('Elige al menos una prenda');
+  await persistLook({ slots, ev: b.ev, date: today(), fr: 'tarde' }, wear ? { worn: true, fav: true } : { fav: true });
+  toast(wear ? '¡Apuntado! ✨' : 'Guardado ❤️'); closeSheet('build');
+}
+
+/* ---------- TENDENCIAS ---------- */
+function openTrend(id) {
+  const t = TRENDS.find(x => x.id === id); const list = S.items.filter(t.m);
+  openSheet('trend', () => `${sheetHdr('', 'trend')}
+    <div class="trend" style="--a:${t.a};--b:${t.b};width:100%;height:200px;flex:none"><span class="ring"></span><span class="big" style="font-size:64px">${t.e}</span><b style="font-size:26px">${t.t}</b><small style="font-size:13px">${t.s}</small></div>
+    <div class="sec-t"><h2>${list.length ? `Tienes ${list.length} prenda${list.length > 1 ? 's' : ''} así` : 'Aún no tienes ninguna'}</h2></div>
+    ${list.length ? `<div class="grid3">${list.map(i => itile(i)).join('')}</div><p class="small muted" style="margin-top:10px">Toca una prenda y pulsa «Hacer un look con esta prenda».</p>` : '<p class="muted">Si te compras algo así, márcalo al añadirlo (color, estampado o tejido) y la app lo detectará sola.</p>'}
+    <p class="small muted" style="margin-top:18px">Tendencias otoño-invierno 2026-27.</p>`);
+}
+function openTrendsAll() {
+  openSheet('trends', () => `${sheetHdr('Tendencias', 'trends')}<p class="muted small" style="margin-bottom:12px">Otoño-invierno 2026-27 · cruzadas con tu armario</p>
+    <div class="grid2">${TRENDS.filter(trendVisible).map(t => { const n = S.items.filter(t.m).length; return `<button class="trend" style="--a:${t.a};--b:${t.b};width:100%;flex:none" onclick="openTrend('${t.id}')"><span class="ring"></span><span class="big">${t.e}</span><b>${t.t}</b><small>${t.s}</small><span class="badge" ${n ? '' : 'style="opacity:.75"'}>${n ? `Tienes ${n}` : 'Aún no tienes'}</span></button>`; }).join('')}</div>`);
+}
+
+/* ---------- PERFIL ---------- */
+function renderPerfil() {
+  const P = S.profile; const st = S.settings.stored || [];
+  return `<div class="hdr"><h1 style="font-size:32px">Perfil</h1></div>
+    <div class="card row" style="gap:14px"><div class="avatar">${esc((P.name || '?')[0].toUpperCase())}</div><div class="grow"><h2 style="font-size:22px">${esc(P.name || '')}</h2>
+      <div class="small muted">${{ f: 'Chica', m: 'Chico', x: 'Prefiero no decirlo' }[P.gender] || ''} · ${esc(P.age || '')} · ${esc(P.cityName || P.city || '')}</div>
+      <div class="chips wrap" style="margin-top:6px">${(P.styles || []).map(s => `<span class="chip" style="padding:4px 10px;font-size:12px">${s}</span>`).join('')}</div></div></div>
+    <div class="card" style="padding:4px 16px">
+      ${menuItem('#E8729B', '✏️', 'Mis datos', 'Nombre, estilo, colores, trabajo…', 'openOnboarding(true)')}
+      ${menuItem('#16A6A0', '🎨', 'Tema de la app', (S.settings.theme || 'auto') === 'auto' ? `Automático · ahora ${THEMES[seasonTheme()][0]} ${THEMES[seasonTheme()][1]}` : `${THEMES[S.settings.theme][0]} ${THEMES[S.settings.theme][1]} (fijo)`, "openSheet('theme',renderTheme,true)")}
+      ${menuItem('#F29A2E', '📦', 'Cambio de armario', st.length ? 'Guardada: ' + SEASONS.filter(s => st.includes(s[0])).map(s => s[1]).join(', ') : 'Todo a mano', "openSheet('store',renderStore,true)")}
+      ${menuItem('#5B8DEF', '📊', 'Estadísticas', 'Lo que más y menos usas', "openSheet('stats',renderStats)")}
+      ${menuItem('#7A1F2B', '✨', 'Tendencias de la temporada', 'Cuáles tienes en tu armario', 'openTrendsAll()')}
+    </div>
+    <div class="card" style="padding:4px 16px">
+      ${menuItem('#5FA36B', '💾', 'Exportar copia de seguridad', 'Todo tu armario y fotos en un archivo', 'exportData()')}
+      ${menuItem('#2FA39A', '📥', 'Importar copia', 'Restaurar desde un archivo', "$('#impf').click()")}
+      ${menuItem('#9C7BD6', '🧪', S.items.some(i => i.demo) ? 'Quitar armario de ejemplo' : 'Cargar armario de ejemplo', 'Para probar la app', S.items.some(i => i.demo) ? 'clearDemo()' : 'loadDemo()')}
+      ${menuItem('#B3261E', '🗑️', 'Borrar todo', 'Empezar de cero', 'wipeAll()')}
+    </div>
+    <input type="file" id="impf" accept="application/json,.json" hidden onchange="importData(this)">
+    <div class="note">💡 Todo se guarda solo en este móvil. Haz una copia de seguridad de vez en cuando, sobre todo antes de cambiar de teléfono.</div>
+    <p class="center small muted">Mi Armario · v1.0</p>`;
+}
+const menuItem = (c, e, t, s, fn) => `<button class="menu-item" style="--c:${c}" onclick="${fn}"><span class="mi">${e}</span><span><b>${t}</b><small>${s}</small></span><span class="ar">›</span></button>`;
+function renderStore() {
+  const st = S.settings.stored || [];
+  return `<h2 class="serif" style="margin-bottom:6px">Cambio de armario</h2><p class="muted small" style="margin-bottom:14px">Marca la ropa que tienes guardada (altillo, cajas…). No la usaré para looks y saldrá en gris en tu armario.</p>
+    ${SEASONS.map(s => { const n = S.items.filter(i => [...i.seasons].every(x => x === s[0])).length; return `<button class="bigopt ${st.includes(s[0]) ? 'on' : ''}" style="--c:${s[3]}" onclick="togStore('${s[0]}')"><span class="e">${s[2]}</span><span class="grow">${s[1]}<div class="small muted" style="font-weight:400">${n} prendas solo de esta estación</div></span><span>${st.includes(s[0]) ? '📦 Guardada' : 'A mano'}</span></button>`; }).join('')}
+    <p class="small muted">Las prendas de varias estaciones (vaqueros, camisetas básicas…) siguen disponibles mientras alguna de sus estaciones esté a mano.</p>`;
+}
+async function togStore(s) { const st = S.settings.stored || []; S.settings.stored = st.includes(s) ? st.filter(x => x !== s) : st.concat(s); S.settings.dayLook = null; await saveSettings(); rs('store'); render(); }
+function renderStats() {
+  const items = S.items; const u = usageMap(); const t = today();
+  const worn = S.looks.filter(l => l.worn).length;
+  const most = items.filter(i => u[i.id]).sort((a, b) => u[b.id].n - u[a.id].n).slice(0, 6);
+  const forgotten = items.filter(i => { const x = u[i.id]; return x ? daysBetween(x.last, t) > 120 : (i.added && daysBetween(i.added.slice(0, 10), t) > 45); }).slice(0, 9);
+  const cc = {}; items.forEach(i => cc[i.color] = (cc[i.color] || 0) + 1); const ctop = Object.entries(cc).sort((a, b) => b[1] - a[1]).slice(0, 7); const max = ctop.length ? ctop[0][1] : 1;
+  const has = f => items.some(i => f(i, ty(i)));
+  const gaps = [
+    [!has((i, t) => t.slot === 'shoes' && i.f >= 4), '👠 Zapatos para ocasiones especiales'],
+    [!has((i, t) => t.slot === 'outer' && t.fl.includes('warm')), '🧥 Un abrigo de invierno'],
+    [!has((i, t) => t.slot === 'outer' && t.fl.includes('rain')), '☔ Algo para la lluvia'],
+    [!has((i, t) => t.slot === 'bag' && i.f >= 4), '👛 Un bolso de fiesta'],
+    [!has((i, t) => t.slot === 'swim'), '👙 Bikini o bañador'],
+    [!has((i, t) => t.sec === 'deporte' && t.slot === 'bottom'), '🏋️ Ropa de deporte'],
+    [!has((i, t) => t.id === 'blazer'), '🧥 Una americana'],
+    [!has((i, t) => (t.slot === 'full' || t.slot === 'bottom') && i.f >= 4), '✨ Algo formal para eventos']
+  ].filter(g => g[0]).map(g => g[1]);
+  return `${sheetHdr('Estadísticas', 'stats')}
+    <div class="grid3"><div class="stat" style="--c:var(--coral)"><b>${items.length}</b><small>prendas</small></div><div class="stat" style="--c:var(--sky)"><b>${worn}</b><small>looks puestos</small></div><div class="stat" style="--c:var(--sage)"><b>${S.looks.filter(l => l.fav).length}</b><small>favoritos</small></div></div>
+    <div class="sec-t"><h2>Por sección</h2></div><div class="card">${SECS.map(s => { const n = items.filter(i => ty(i).sec === s[0]).length; return `<div class="row" style="margin:6px 0"><span style="width:120px" class="small">${s[2]} ${s[1]}</span><div class="bar"><i style="width:${items.length ? n / items.length * 100 : 0}%;background:${s[3]}"></i></div><b class="small" style="width:26px;text-align:right">${n}</b></div>`; }).join('')}</div>
+    ${most.length ? `<div class="sec-t"><h2>Tus favoritas de verdad</h2></div><div class="grid3">${most.map(i => itile(i)).join('')}</div>` : ''}
+    ${forgotten.length ? `<div class="sec-t"><h2>Olvidadas 👀</h2></div><p class="small muted" style="margin:-4px 0 10px">Hace mucho que no te las pones. ¿Darles una oportunidad, venderlas o donarlas?</p><div class="grid3">${forgotten.map(i => itile(i)).join('')}</div>` : ''}
+    ${ctop.length ? `<div class="sec-t"><h2>Tus colores</h2></div><div class="card">${ctop.map(([c, n]) => `<div class="row" style="margin:6px 0"><span style="width:120px" class="small">${COL[c].name}</span><div class="bar"><i style="width:${n / max * 100}%;background:${COL[c].hex === 'multi' ? 'linear-gradient(90deg,#F2735E,#E9B23F,#5FA36B,#5B8DEF)' : COL[c].hex};${isLight(COL[c].hex) ? 'box-shadow:inset 0 0 0 1px #ddd' : ''}"></i></div><b class="small" style="width:26px;text-align:right">${n}</b></div>`).join('')}</div>` : ''}
+    ${gaps.length ? `<div class="sec-t"><h2>Te falta…</h2></div><div class="chips wrap">${gaps.map(g => `<span class="chip">${g}</span>`).join('')}</div>` : ''}`;
+}
+
+/* ---------- copia de seguridad ---------- */
+function exportData() {
+  const data = { app: 'miarmario', v: 1, exported: new Date().toISOString(), profile: S.profile, settings: S.settings, items: S.items, looks: S.looks };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `mi-armario-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('Copia descargada 💾');
+}
+async function importData(input) {
+  const f = input.files && input.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text()); if (d.app !== 'miarmario') throw 0;
+    if (!confirm(`¿Restaurar ${d.items.length} prendas y ${d.looks.length} looks? Se sustituirá lo que hay ahora.`)) return;
+    await DB.clear('items'); await DB.clear('looks');
+    for (const i of d.items) await DB.put('items', i); for (const l of d.looks) await DB.put('looks', l);
+    S.items = d.items; S.looks = d.looks; S.profile = d.profile; S.settings = { stored: [], custom: [], ...d.settings, dayLook: null }; S._u = null;
+    await saveProfile(); await saveSettings(); toast('Copia restaurada ✓'); render();
+  } catch (e) { toast('Ese archivo no es una copia válida'); }
+  input.value = '';
+}
+async function wipeAll() {
+  if (!confirm('¿Borrar TODO (prendas, looks y perfil)? No se puede deshacer.')) return;
+  await DB.clear('items'); await DB.clear('looks'); await DB.clear('kv');
+  S.items = []; S.looks = []; S.profile = null; S.settings = { stored: [], custom: [], dayLook: null, manual: null, theme: S.settings.theme || 'auto' }; S._u = null;
+  openOnboarding(false);
+}
+
+/* ---------- armario de ejemplo ---------- */
+async function loadDemo() {
+  const F = [['cam_basica','blanco'],['cam_basica','negro'],['cam_ml','marino','rayas','algodon'],['blusa_sat','crema','liso','saten'],['camisa','blanco'],['jersey','burdeos','liso','punto'],['cuello_alto','crema','liso','punto'],['jersey_fino','gris'],['cardigan','camel','liso','punto'],['tirantes','negro'],['top_lencero','rosaemp','liso','saten'],['blusa','rosa','flores'],
+    ['vaqueros','denim','liso','vaquero'],['vaqueros_anchos','celeste','liso','vaquero'],['pinza','beige'],['pinza','negro'],['falda_midi','oliva'],['falda_cuero','marron','liso','cuero'],['shorts','denim','liso','vaquero'],['pantalon_lino','blanco','liso','lino'],['pana','camel','liso','pana'],
+    ['vestido_negro','negro'],['vestido_corto','amarillo','flores'],['vestido_largo','blanco','liso','lino'],['vestido_punto','berenjena','liso','punto'],['vestido_fiesta','rojo','liso','saten'],['traje_falda','gris','cuadros','lana'],['mono_largo','klein'],['bikini','fucsia'],['pareo','naranja','flores'],
+    ['trench','beige'],['biker','negro','liso','cuero'],['abrigo_largo','camel','liso','lana'],['plumifero','negro'],['blazer','negro'],['abrigo_pelo','marron','liso','pelo'],['cazadora_vaq','denim','liso','vaquero'],['impermeable','amarillo'],
+    ['zapatillas_blancas','blanco'],['botines','marron','liso','cuero'],['botas_altas','marron','liso','cuero'],['salones','negro'],['sandalias','camel'],['sandalias_tacon','dorado'],['bailarinas','rojo'],['chanclas','negro'],['mocasines','negro','liso','cuero'],
+    ['shopper','camel','liso','cuero'],['bandolera','negro'],['clutch','dorado'],['rafia','beige'],['gafas_sol','negro'],['panuelo','burdeos','cuadros','seda'],['bufanda','gris','liso','lana'],['collar','dorado'],['pendientes','dorado'],['reloj','plateado'],['cinturon','marron','liso','cuero'],['sombrero_paja','beige'],['gorro','crema','liso','punto'],['medias','negro'],['guantes','marron','liso','cuero'],
+    ['top_dep','lila'],['mallas_largas','negro'],['mallas_cortas','menta'],['zap_running','rosa'],['sudadera_tec','gris'],['bolsa_dep','negro']];
+  const M = [['cam_basica','blanco'],['cam_basica','negro'],['polo','marino'],['camisa','blanco'],['camisa','celeste'],['camisa_franela','burdeos','cuadros'],['jersey','oliva','liso','punto'],['cuello_alto','negro','liso','punto'],['jersey_fino','gris'],['sudadera','gris'],['camisa_lino','blanco','liso','lino'],
+    ['vaqueros','denim','liso','vaquero'],['chinos','beige'],['pinza','gris'],['pana','marron','liso','pana'],['bermudas','beige'],['traje','marino'],['banador','klein'],['camisa_playa','naranja','flores'],
+    ['blazer','marino'],['biker','marron','liso','cuero'],['abrigo_largo','camel','liso','lana'],['plumifero','negro'],['cazadora_ante','camel','liso','ante'],['trench','beige'],
+    ['zapatillas_blancas','blanco'],['chelsea','marron','liso','ante'],['zapato_vestir','negro','liso','cuero'],['mocasines','marron','liso','cuero'],['nauticos','marino'],['chanclas','negro'],
+    ['mochila','negro'],['bandolera','marron','liso','cuero'],['gafas_sol','negro'],['bufanda','burdeos','liso','lana'],['corbata','burdeos'],['reloj','plateado'],['cinturon','marron','liso','cuero'],['gorra','marino'],['gorro','gris','liso','punto'],
+    ['cam_tecnica','klein'],['pantalon_dep','negro'],['chandal','gris'],['zap_running','naranja'],['bolsa_dep','negro']];
+  const list = gender() === 'm' ? M : F; const now = Date.now();
+  for (const [type, color, pattern, fabric] of list) {
+    const t = TYPES[type]; if (!t) continue;
+    await saveItem({ id: uid(), type, name: '', color, color2: null, pattern: pattern || 'liso', fabric: fabric || '', seasons: t.seasons, f: t.f, occ: [], brand: '', fav: Math.random() < 0.12, state: 'ok', photo: null, added: new Date(now - (20 + Math.random() * 200) * 864e5).toISOString(), demo: true });
+  }
+  S.settings.dayLook = null; await saveSettings(); toast(`Cargadas ${list.length} prendas de ejemplo 👗`); render();
+}
+async function clearDemo() { if (!confirm('¿Quitar las prendas de ejemplo?')) return; for (const i of S.items.filter(x => x.demo)) await DB.del('items', i.id); S.items = S.items.filter(x => !x.demo); S.settings.dayLook = null; await saveSettings(); toast('Ejemplo eliminado'); render(); }
+
+/* =========================================================
+   BIENVENIDA (onboarding)
+   ========================================================= */
+function openOnboarding(edit) {
+  S.ob = { step: 0, edit, d: edit ? JSON.parse(JSON.stringify(S.profile)) : { name: '', gender: '', age: '', city: '', styles: [], fav: [], hate: [], excl: [], comfort: 50, job: '' } };
+  openSheet('ob', renderOb);
+}
+const OB_STEPS = [
+  { t: d => '¡Hola! 👋<br>¿Cómo te llamas?', q: 'Así sabré a quién preparo los looks.', ok: d => d.name.trim(),
+    b: d => `<input class="inp" style="font-size:20px;padding:16px" placeholder="Tu nombre" value="${esc(d.name)}" oninput="S.ob.d.name=this.value" onkeydown="if(event.key==='Enter')obNext()">` },
+  { t: d => `Encantada, ${esc(d.name)} ✨<br>¿Cómo te identificas?`, q: 'Me sirve para enseñarte el catálogo de prendas adecuado.', ok: d => d.gender,
+    b: d => [['f','Chica','👩','#E8729B'],['m','Chico','👨','#5B8DEF'],['x','Prefiero no decirlo','🌈','#9C7BD6']].map(o => `<button class="bigopt ${d.gender === o[0] ? 'on' : ''}" style="--c:${o[3]}" onclick="S.ob.d.gender='${o[0]}';rs('ob')"><span class="e">${o[2]}</span>${o[1]}</button>`).join('') },
+  { t: () => '¿Cuántos años tienes?', q: 'Para afinar un poco las sugerencias.', ok: d => d.age,
+    b: d => `<div class="chips wrap">${AGES.map(a => `<button class="chip ${d.age === a ? 'on' : ''}" style="font-size:16px;padding:12px 20px" onclick="S.ob.d.age='${a}';rs('ob')">${a}</button>`).join('')}</div>` },
+  { t: () => '¿En qué ciudad vives? 🌤️', q: 'Miro el tiempo para que no pases frío ni calor.', ok: d => d.city || d.lat,
+    b: d => `<input class="inp" style="font-size:18px;padding:16px" placeholder="Ej: Benidorm" value="${esc(d.city || '')}" oninput="S.ob.d.city=this.value;S.ob.d.lat=null;S.ob.d.cityName=null"><button class="btn" style="margin-top:12px" onclick="obGeo()">📍 Usar mi ubicación</button>${d.lat && d.cityName ? `<p class="small muted" style="margin-top:8px">✓ ${esc(d.cityName)}</p>` : ''}` },
+  { t: () => '¿Con qué estilos te identificas?', q: 'Puedes marcar varios.', ok: d => d.styles.length,
+    b: d => `<div class="chips wrap">${STYLES.map((s, k) => `<button class="chip ${d.styles.includes(s) ? 'on' : ''}" style="--c:${FAM_COLORS[k % FAM_COLORS.length]};font-size:15px;padding:11px 18px" onclick="obTog('styles','${s}')">${s}</button>`).join('')}</div>` },
+  { t: () => 'Tus colores 🎨', q: 'Los favoritos los usaré más. Los que nunca te pones, no los sugeriré.', ok: () => true,
+    b: d => `<div class="field"><label>💖 Me encantan</label>${obColors('fav')}</div><div class="field"><label>🚫 Nunca me pongo</label>${obColors('hate')}</div>` },
+  { t: () => '¿Hay algo que no te pongas nunca?', q: 'Lo quitaré de las sugerencias. Si no, sigue.', ok: () => true,
+    b: d => `<div class="chips wrap">${EXCL.filter(e => d.gender === 'm' ? ['animal','cuero'].includes(e.id) : true).map(e => `<button class="chip ${d.excl.includes(e.id) ? 'on' : ''}" style="--c:#B3261E;font-size:15px;padding:11px 18px" onclick="obTog('excl','${e.id}')">${e.l}</button>`).join('')}</div>` },
+  { t: () => '¿Qué prefieres en el día a día?', q: 'Desliza hacia donde te sientas más tú.', ok: () => true,
+    b: d => `<div style="font-size:40px;display:flex;justify-content:space-between;margin-bottom:8px"><span>🧸</span><span>💄</span></div><input type="range" min="0" max="100" value="${d.comfort}" oninput="S.ob.d.comfort=+this.value"><div class="seg" style="font-size:13px"><span>Comodidad ante todo</span><span>Siempre arreglada</span></div>` },
+  { t: () => '¿Cómo es tu trabajo?', q: 'Para tu look de diario de lunes a viernes.', ok: d => d.job,
+    b: d => JOBS.map((j, k) => `<button class="bigopt ${d.job === j[0] ? 'on' : ''}" style="--c:${FAM_COLORS[k % FAM_COLORS.length]}" onclick="S.ob.d.job='${j[0]}';rs('ob')"><span class="e">${j[2]}</span>${j[1]}</button>`).join('') }
+];
+function obColors(key) { const d = S.ob.d; return `<div class="ccgrid">${COLORS.map(c => `<button class="cc ${d[key].includes(c[0]) ? 'on' : ''}" onclick="obTog('${key}','${c[0]}')"><i style="background:${c[2] === 'multi' ? 'conic-gradient(#F2735E,#E9B23F,#5FA36B,#5B8DEF,#9C7BD6,#F2735E)' : c[2]}"></i>${c[1]}</button>`).join('')}</div>`; }
+function obTog(key, v) { const d = S.ob.d; d[key] = d[key].includes(v) ? d[key].filter(x => x !== v) : d[key].concat(v); if (key === 'fav') d.hate = d.hate.filter(x => x !== v); if (key === 'hate') d.fav = d.fav.filter(x => x !== v); rs('ob'); }
+function obGeo() {
+  if (!navigator.geolocation) return toast('Tu móvil no permite la ubicación');
+  navigator.geolocation.getCurrentPosition(p => { const d = S.ob.d; d.lat = p.coords.latitude; d.lon = p.coords.longitude; d.cityName = 'Mi ubicación'; d.city = d.city || 'Mi ubicación'; rs('ob'); }, () => toast('No he podido obtener la ubicación'));
+}
+function renderOb() {
+  const o = S.ob; const d = o.d;
+  if (o.step >= OB_STEPS.length) {
+    return `<div class="ob"><div class="prog"><i style="width:100%"></i></div><div class="center" style="margin-top:40px"><div style="font-size:72px">👗✨</div>
+      <h1>¡Todo listo, ${esc(d.name)}!</h1><p class="muted">Empieza añadiendo unas 10 prendas (mínimo una parte de arriba, una de abajo y unos zapatos) y te preparo tu primer look.</p></div>
+      <div class="foot" style="flex-direction:column"><button class="btn btn-pri btn-big" onclick="obFinish('add')">＋ Añadir mis prendas</button><button class="btn btn-big" onclick="obFinish('demo')">🧪 Probar con un armario de ejemplo</button></div></div>`;
+  }
+  const st = OB_STEPS[o.step]; const ok = st.ok(d);
+  return `<div class="ob"><div class="row" style="justify-content:space-between">${o.step > 0 ? `<button class="icon-btn" onclick="S.ob.step--;rs('ob')">‹</button>` : (o.edit ? `<button class="icon-btn" onclick="closeSheet('ob')">✕</button>` : '<span></span>')}
+      <span class="small muted">${o.step + 1} / ${OB_STEPS.length}</span>${!o.edit && o.step > 0 ? `<button class="small muted" onclick="obSkip()">Saltar</button>` : '<span style="width:40px"></span>'}</div>
+    <div class="prog"><i style="width:${(o.step + 1) / OB_STEPS.length * 100}%"></i></div>
+    <h1>${st.t(d)}</h1><p class="q">${st.q}</p>${st.b(d)}
+    <div class="foot">${o.edit ? `<button class="btn grow" onclick="obSave()">Guardar</button>` : ''}<button class="btn btn-pri btn-big grow" ${ok ? '' : 'style="opacity:.45"'} onclick="obNext()">${o.step === OB_STEPS.length - 1 ? (o.edit ? 'Guardar' : 'Terminar') : 'Siguiente'} ›</button></div></div>`;
+}
+function obNext() { const o = S.ob; const st = OB_STEPS[o.step]; if (!st.ok(o.d)) return toast('Responde para seguir 🙂'); if (o.edit && o.step === OB_STEPS.length - 1) return obSave(); o.step++; rs('ob'); const s = SH.find(x => x.id === 'ob'); if (s) s.el.scrollTop = 0; }
+function obSkip() { const d = S.ob.d; d.gender = d.gender || 'f'; d.age = d.age || '26-35'; d.job = d.job || 'casual'; if (!d.styles.length) d.styles = ['Casual']; S.ob.step = OB_STEPS.length; rs('ob'); }
+async function obSave() { const d = S.ob.d; const cityChanged = !S.profile || d.city !== S.profile.city; S.profile = { ...d, done: true }; if (cityChanged && d.cityName !== 'Mi ubicación') { S.profile.lat = null; S.profile.cityName = null; } await saveProfile(); S.settings.dayLook = null; await saveSettings(); S.fc = null; closeSheet('ob'); refreshWeather(true); toast('Datos guardados ✓'); }
+async function obFinish(next) { S.profile = { ...S.ob.d, done: true }; await saveProfile(); closeSheet('ob', true); S.tab = 'hoy'; render(); refreshWeather(true); if (next === 'demo') loadDemo(); else openAdd('ropa'); }
+
+/* ---------- noticias (opcional: noticias.json junto a la app) ---------- */
+function loadNews() {
+  fetch('noticias.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : []).then(a => { S.news = Array.isArray(a) ? a.slice(0, 12) : []; if (S.news.length && S.tab === 'hoy' && !SH.length) render(); }).catch(() => { });
+}
+
+/* ---------- PWA ---------- */
+function setupPWA() {
+  const icon = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2735E"/><stop offset="1" stop-color="#7A1F2B"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><path d="M256 150a34 34 0 1 1 34 34c-18 0-34 12-34 30v12l150 92c22 14 12 46-14 46H120c-26 0-36-32-14-46l150-92" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
+  const man = { name: 'Mi Armario', short_name: 'Armario', start_url: location.href.split('#')[0], display: 'standalone', background_color: '#FBF4EC', theme_color: '#7A1F2B', icons: [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }] };
+  const l = document.createElement('link'); l.rel = 'manifest'; l.href = URL.createObjectURL(new Blob([JSON.stringify(man)], { type: 'application/manifest+json' })); document.head.appendChild(l);
+  const a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = icon; document.head.appendChild(a);
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
+}
+
+/* ---------- arranque ---------- */
+async function init() {
+  setupPWA();
+  const ok = await DB.open(); if (!ok) setTimeout(() => toast('Modo temporal: los datos no se guardarán'), 800);
+  const kv = await DB.all('kv'); const g = k => (kv.find(x => x.k === k) || {}).v;
+  S.profile = g('profile') || null; S.settings = { stored: [], custom: [], dayLook: null, manual: null, theme: 'auto', ...(g('settings') || {}) };
+  applyTheme();
+  S.items = await DB.all('items'); S.looks = await DB.all('looks');
+  if (!S.profile || !S.profile.done) openOnboarding(false);
+  else { render(); refreshWeather(); }
+  loadNews();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { applyTheme(); if (S.profile && S.profile.done) refreshWeather(); } });
+}
+init();
+</script>
+</body>
+</html>
